@@ -1339,6 +1339,84 @@ button { font: inherit; }
 }
 
 /* =========================================================================
+   Griglia orari (timetable di un giorno · laboratori × turni)
+   ========================================================================= */
+.orari { margin-bottom: clamp(28px, 4vw, 44px); }
+.orari__title {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 14px;
+}
+.orari__scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.orari-table {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: 18px;
+  overflow: hidden;
+}
+.orari-table th,
+.orari-table td {
+  padding: 13px 12px;
+  text-align: center;
+  border-bottom: 1px solid rgba(0, 0, 0, .06);
+}
+.orari-table tbody tr:last-child th,
+.orari-table tbody tr:last-child td { border-bottom: none; }
+.orari-table thead th {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: var(--ink-2);
+  background: rgba(0, 0, 0, .025);
+}
+.orari-table thead th:first-child { text-align: left; }
+.orari-table tbody th[scope="row"] {
+  text-align: left;
+  font-size: 14.5px;
+  font-weight: 800;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.orari-num {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--c);
+  margin-right: 8px;
+}
+.orari-dot {
+  display: inline-block;
+  vertical-align: middle;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+}
+a.orari-dot {
+  box-shadow: 0 2px 7px rgba(0, 0, 0, .18);
+  transition: transform .15s ease;
+}
+a.orari-dot:hover { transform: scale(1.28); }
+.orari-dot--empty {
+  width: 7px;
+  height: 7px;
+  background: rgba(0, 0, 0, .1);
+}
+.orari__note {
+  margin-top: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-3);
+}
+
+/* =========================================================================
    Responsive — qualche aggiustamento (oltre a clamp/auto-fit)
    ========================================================================= */
 @media (max-width: 640px) {

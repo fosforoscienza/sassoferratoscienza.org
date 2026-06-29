@@ -1,11 +1,83 @@
+import { createServerClient } from '@supabase/ssr'
 import LandingInteractions from './LandingInteractions'
 import { LANDING_HTML } from './landing-html'
 
-export default function Home() {
+// Rivalida la home (e quindi la griglia orari) ogni 5 minuti.
+export const revalidate = 300
+
+// Client Supabase pubblico (senza cookie) per la lettura dei laboratori/turni:
+// le tabelle sass_eventi e sass_turni hanno policy di lettura pubblica.
+function publicClient() {
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { cookies: { getAll: () => [], setAll: () => {} } }
+  )
+}
+
+type EventoLite = { id: string; numero: number; titolo: string; colore: string; a_turni: boolean }
+
+function buildOrariGrid(eventi: EventoLite[], turniByEvento: Map<string, string[]>): string {
+  // Laboratori a turni, in ordine; colonne = unione degli orari di inizio turno
+  const labs = eventi.filter(e => (turniByEvento.get(e.id)?.length ?? 0) > 0)
+  const allTimes = new Set<string>()
+  for (const lab of labs) for (const t of turniByEvento.get(lab.id) ?? []) allTimes.add(t)
+  const times = Array.from(allTimes).sort()
+  if (!labs.length || !times.length) return ''
+
+  const head = times.map(t => `<th>${t}</th>`).join('')
+  const rows = labs
+    .map(e => {
+      const labTimes = new Set(turniByEvento.get(e.id) ?? [])
+      const cells = times
+        .map(t =>
+          labTimes.has(t)
+            ? `<td><a class="orari-dot" href="/prenota/${e.id}" style="background:${e.colore}" aria-label="${e.titolo} — turno delle ${t}"></a></td>`
+            : `<td><span class="orari-dot orari-dot--empty" aria-hidden="true"></span></td>`
+        )
+        .join('')
+      return `<tr style="--c:${e.colore}"><th scope="row"><span class="orari-num">${String(e.numero).padStart(2, '0')}</span>${e.titolo}</th>${cells}</tr>`
+    })
+    .join('')
+
+  return `<div class="orari" data-reveal>
+      <div class="orari__title">Gli orari · venerdì 24 luglio</div>
+      <div class="orari__scroll">
+        <table class="orari-table">
+          <thead><tr><th scope="col">Laboratorio</th>${head}</tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+      <p class="orari__note">Ogni pallino è un turno prenotabile: cliccalo per prenotare. Negli altri orari l'accesso ai laboratori è libero.</p>
+    </div>`
+}
+
+export default async function Home() {
+  let gridHtml = ''
+  try {
+    const supabase = publicClient()
+    const [{ data: eventi }, { data: turni }] = await Promise.all([
+      supabase.from('sass_eventi').select('id, numero, titolo, colore, a_turni').order('numero', { ascending: true }),
+      supabase.from('sass_turni').select('evento_id, ora_inizio').order('ora_inizio', { ascending: true }),
+    ])
+    const turniByEvento = new Map<string, string[]>()
+    for (const t of turni ?? []) {
+      const hhmm = String(t.ora_inizio).slice(0, 5)
+      const arr = turniByEvento.get(t.evento_id) ?? []
+      if (!arr.includes(hhmm)) arr.push(hhmm)
+      turniByEvento.set(t.evento_id, arr)
+    }
+    gridHtml = buildOrariGrid((eventi ?? []) as EventoLite[], turniByEvento)
+  } catch (err) {
+    console.error('[home] griglia orari non generata:', err)
+  }
+
+  const html = LANDING_HTML.replace('<!--ORARI_GRID-->', gridHtml)
+
   return (
     <div className="landing-root">
       <div className="paper" aria-hidden="true" />
-      <div className="page" dangerouslySetInnerHTML={{ __html: LANDING_HTML }} />
+      <div className="page" dangerouslySetInnerHTML={{ __html: html }} />
       <LandingInteractions />
     </div>
   )

@@ -93,6 +93,8 @@ export const LANDING_HTML = `
           <p>Cinque laboratori per scoprire la fisica, la matematica, l'astronomia, la natura e i sensi. Tutti gratuiti e <strong>su prenotazione</strong> su sassoferratoscienza.org.</p>
         </div>
 
+        <!--ORARI_GRID-->
+
         <div class="lab-grid">
 
           <article class="lab-card lab-card--blue" data-reveal>
