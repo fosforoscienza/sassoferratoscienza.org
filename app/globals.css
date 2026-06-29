@@ -17,6 +17,12 @@
       font-size: 16px;
     }
   }
+
+  /* Titoli con Barlow Condensed (font-display) in MAIUSCOLO, come il manifesto */
+  .font-display {
+    text-transform: uppercase;
+    letter-spacing: .005em;
+  }
 }
 
 @layer components {

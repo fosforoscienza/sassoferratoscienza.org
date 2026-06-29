@@ -1471,3 +1471,20 @@ a.orari-dot:hover { transform: scale(1.28); }
     transform: none !important;
   }
 }
+
+/* =========================================================================
+   Resa titoli come il manifesto: MAIUSCOLO + Barlow Condensed Bold (700)
+   (in coda al file per vincere su eventuali regole per-elemento)
+   ========================================================================= */
+.landing-root h1,
+.landing-root h2,
+.landing-root h3,
+.terr-card__title {
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: .005em;
+}
+/* "Ancora Tu" (titolo canzone) resta in caso misto come nel manifesto */
+.finale h2 {
+  text-transform: none;
+}
