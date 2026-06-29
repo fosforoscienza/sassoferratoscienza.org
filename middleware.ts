@@ -1,8 +1,9 @@
-import { createServerClient } from '@supabase/ssr'
 import { NextResponse, NextRequest } from 'next/server'
 
-const AUTH_PATHS = ['/login']
-const PROTECTED_PATHS = ['/admin']
+// Middleware Edge-safe: solo guard CSRF sulle API mutanti + header CSP.
+// L'autenticazione admin è garantita server-side in app/admin/layout.tsx
+// (Node runtime) e nelle route API, quindi qui NON usiamo @supabase/ssr
+// (che non è compatibile con l'Edge runtime e farebbe fallire il middleware).
 
 const ALLOWED_HOSTS = new Set<string>([
   'sassoferratoscienza.org',
@@ -16,8 +17,6 @@ const MUTATING_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE'])
 function buildCsp(): string {
   return [
     "default-src 'self'",
-    // 'unsafe-inline' negli script serve solo per gli inline minimi della landing;
-    // in alternativa si può passare a nonce. Tailwind/Next iniettano stili inline.
     "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "img-src 'self' data: blob: https://*.supabase.co https:",
@@ -30,10 +29,6 @@ function buildCsp(): string {
     "frame-ancestors 'none'",
     'upgrade-insecure-requests',
   ].join('; ')
-}
-
-function isProtected(pathname: string): boolean {
-  return PROTECTED_PATHS.some(p => pathname.startsWith(p))
 }
 
 function isOriginAllowed(request: NextRequest): boolean {
@@ -56,7 +51,7 @@ function isOriginAllowed(request: NextRequest): boolean {
   return false
 }
 
-export async function middleware(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // CSRF guard sulle mutating API
@@ -66,61 +61,8 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  let response = NextResponse.next({ request: { headers: request.headers } })
+  const response = NextResponse.next()
   response.headers.set('Content-Security-Policy', buildCsp())
-
-  // Auth check sulle route protette
-  if (isProtected(pathname)) {
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return request.cookies.getAll()
-          },
-          setAll(cookiesToSet: { name: string; value: string; options?: Record<string, unknown> }[]) {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              response.cookies.set({ name, value, ...options })
-            })
-          },
-        },
-      }
-    )
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      const redirect = new URL('/login', request.url)
-      redirect.searchParams.set('next', pathname)
-      return NextResponse.redirect(redirect)
-    }
-  }
-
-  // Se già loggato e prova ad accedere a /login, lo mando in /admin
-  if (AUTH_PATHS.includes(pathname)) {
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return request.cookies.getAll()
-          },
-          setAll() {},
-        },
-      }
-    )
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-    if (user && pathname === '/login') {
-      return NextResponse.redirect(new URL('/admin', request.url))
-    }
-  }
-
   return response
 }
 
