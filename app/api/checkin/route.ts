@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
+import { isAllowedOrigin } from '@/lib/csrf'
 
 const CheckinSchema = z.object({
   token: z.string().uuid(),
@@ -44,6 +45,10 @@ async function contaEvento(supabase: ReturnType<typeof createClient>, eventoId: 
 }
 
 export async function POST(req: Request) {
+  if (!isAllowedOrigin(req)) {
+    return NextResponse.json({ error: 'Origine non valida' }, { status: 403 })
+  }
+
   const supabase = createClient()
   const {
     data: { user },

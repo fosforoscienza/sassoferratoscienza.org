@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/server'
 import { inviaEmailPrenotazione } from '@/lib/email'
 import { rateLimitPrenota, getIP, checkRateLimit } from '@/lib/ratelimit'
+import { isAllowedOrigin } from '@/lib/csrf'
 
 /**
  * Massimo numero di posti che una singola email può prenotare per uno stesso
@@ -24,6 +25,10 @@ const PrenotaSchema = z.object({
 })
 
 export async function POST(req: Request) {
+  if (!isAllowedOrigin(req)) {
+    return NextResponse.json({ error: 'Origine non valida' }, { status: 403 })
+  }
+
   const ip = getIP(req)
   const limited = await checkRateLimit(rateLimitPrenota, ip, 'prenota')
   if (limited) {

@@ -2,10 +2,15 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/server'
 import { rateLimitPrenota, getIP, checkRateLimit } from '@/lib/ratelimit'
+import { isAllowedOrigin } from '@/lib/csrf'
 
 const TokenSchema = z.string().uuid()
 
 export async function DELETE(_req: Request, { params }: { params: { token: string } }) {
+  if (!isAllowedOrigin(_req)) {
+    return NextResponse.json({ error: 'Origine non valida' }, { status: 403 })
+  }
+
   const ip = getIP(_req)
   const limited = await checkRateLimit(rateLimitPrenota, ip, 'prenota-cancel')
   if (limited) {
