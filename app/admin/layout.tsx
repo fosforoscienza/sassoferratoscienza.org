@@ -22,7 +22,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
         <div className="max-w-md rounded-2xl bg-white p-8 text-center shadow">
-          <h1 className="text-xl font-bold text-slate-900">Accesso negato</h1>
+          <h1 className="font-display text-2xl font-bold text-brown">Accesso negato</h1>
           <p className="mt-2 text-sm text-slate-600">
             L&apos;email <strong>{user.email}</strong> non è nella whitelist degli amministratori.
           </p>

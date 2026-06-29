@@ -26,7 +26,7 @@ export const LANDING_HTML = `
           <h1 class="hero__title">
             <span>Giochiamo</span>
             <span>con la</span>
-            <span class="text-rainbow">scienza</span>
+            <span>scienza</span>
           </h1>
           <p class="hero__lead">
             Una giornata di laboratori, spettacoli e meraviglia scientifica per tutta la famiglia, tra le piazze di Sassoferrato. Il divertimento e la curiosità sono le chiavi dell'apprendimento.

@@ -48,7 +48,7 @@ export default async function AdminPrenotazioniPage({
     <main className="mx-auto max-w-7xl px-4 py-6 md:py-8">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-xl font-extrabold text-sass-900 md:text-2xl">Prenotazioni</h1>
+          <h1 className="font-display text-2xl font-black text-brown md:text-3xl">Prenotazioni</h1>
           <p className="mt-1 text-xs text-slate-600 md:text-sm">
             {prenotazioni.length} prenotazion{prenotazioni.length === 1 ? 'e' : 'i'} · {totPersone} person{totPersone === 1 ? 'a' : 'e'}
             {searchParams.checkin === '1' ? ' · solo con check-in' : ''}
