@@ -43,7 +43,7 @@ export function AuthLayout({
         </div>
 
         <div className="rounded-3xl bg-white/95 p-8 shadow-2xl backdrop-blur-sm">
-          <h2 className="mb-1 text-xl font-bold text-ink">{title}</h2>
+          <h2 className="mb-1 font-display text-2xl font-bold text-brown">{title}</h2>
           {subtitle && <p className="mb-6 text-sm text-ink-soft">{subtitle}</p>}
           {children}
         </div>

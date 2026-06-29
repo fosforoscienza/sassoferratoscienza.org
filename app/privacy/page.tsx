@@ -11,7 +11,7 @@ export default function PrivacyPage() {
     <main className="min-h-screen bg-[#ece2d0]">
       <BookingHeader />
       <section className="mx-auto max-w-2xl px-5 py-10 md:py-14">
-        <h1 className="text-3xl font-black tracking-tight text-ink">Informativa privacy</h1>
+        <h1 className="font-display text-4xl font-black text-brown">Informativa privacy</h1>
         <p className="mt-2 text-sm text-ink-faint">
           Trattamento dei dati per le prenotazioni dei laboratori di Sassoferrato Scienza.
         </p>

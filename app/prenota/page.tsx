@@ -66,7 +66,7 @@ export default async function PrenotaIndexPage() {
         <p className="font-mono text-xs font-bold uppercase tracking-[0.16em] text-sass-700">
           Prenotazioni · 24 luglio 2026
         </p>
-        <h1 className="mt-3 text-3xl font-black tracking-tight text-ink md:text-4xl">
+        <h1 className="mt-3 font-display text-4xl font-black text-brown md:text-5xl">
           Prenota un laboratorio
         </h1>
         <p className="mt-2 max-w-xl text-ink-soft">
@@ -106,7 +106,7 @@ export default async function PrenotaIndexPage() {
                     >
                       {String(ev.numero).padStart(2, '0')} · {ev.categoria}
                     </span>
-                    <h2 className="mt-1 text-xl font-extrabold leading-tight text-ink">{ev.titolo}</h2>
+                    <h2 className="mt-1 font-display text-2xl font-bold leading-tight text-brown">{ev.titolo}</h2>
                     {ev.sottotitolo && (
                       <p className="mt-0.5 text-sm font-semibold" style={{ color: ev.colore }}>
                         {ev.sottotitolo}

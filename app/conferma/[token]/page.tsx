@@ -44,7 +44,7 @@ export default async function ConfermaPage({ params }: { params: { token: string
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h1 className="mt-3 text-2xl font-black">
+            <h1 className="mt-3 font-display text-3xl font-black">
               {prenotazione.check_in_at ? 'Check-in già fatto' : 'Prenotazione confermata'}
             </h1>
             <p className="mt-1 text-sm text-white/85">
@@ -80,7 +80,7 @@ export default async function ConfermaPage({ params }: { params: { token: string
                 {ev.categoria}
               </p>
             )}
-            <h2 className="text-lg font-black text-ink">{ev?.titolo}</h2>
+            <h2 className="font-display text-xl font-bold text-brown">{ev?.titolo}</h2>
             {ev?.sottotitolo && <p className="text-sm text-ink-soft">{ev.sottotitolo}</p>}
             <div className="mt-3 grid gap-1.5 text-sm text-ink-soft">
               <p>📅 <strong>{dataEff ? formatDataIT(dataEff) : ''}</strong></p>

@@ -86,7 +86,7 @@ export default async function PrenotaEventoPage({ params }: { params: { id: stri
                 </span>
               )}
             </div>
-            <h1 className="text-3xl font-black leading-tight tracking-tight text-ink md:text-4xl">
+            <h1 className="font-display text-4xl font-black leading-tight text-brown md:text-5xl">
               {evento.titolo}
             </h1>
             {evento.sottotitolo && (
@@ -160,7 +160,7 @@ export default async function PrenotaEventoPage({ params }: { params: { id: stri
           </article>
         ) : (
           <article className="mt-6 rounded-3xl border border-black/[0.07] bg-white p-6 shadow-sm md:p-8">
-            <h2 className="text-xl font-black text-sass-900">I tuoi dati</h2>
+            <h2 className="font-display text-2xl font-bold text-brown">I tuoi dati</h2>
             <p className="mt-1 text-sm text-ink-soft">
               Riceverai un&apos;email all&apos;indirizzo che inserisci qui sotto, con il QR code da mostrare
               all&apos;ingresso.

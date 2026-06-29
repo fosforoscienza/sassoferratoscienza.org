@@ -37,10 +37,13 @@ const config: Config = {
           soft:    '#5c5448',
           faint:   '#9a8f7e',
         },
+        // Marrone dei titoli (dal manifesto)
+        brown: '#412821',
         paper: '#efe6d6',
       },
       fontFamily: {
         sans: ['Hanken Grotesk', 'system-ui', '-apple-system', 'sans-serif'],
+        display: ['Barlow Condensed', 'Hanken Grotesk', 'system-ui', 'sans-serif'],
         mono: ['Space Mono', 'ui-monospace', 'SFMono-Regular', 'monospace'],
       },
     },
