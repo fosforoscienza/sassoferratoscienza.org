@@ -300,10 +300,10 @@ INSERT INTO public.sass_eventi
 VALUES
   (1, 'Tinkering', '#3db3e4', '2026-07-24', '17:30', '22:00',
    'Discesa libera', 'Si freni chi può', '8+', 'Piazza Bartolo', NULL, TRUE, 45, 5,
-   'Usa materiali di uso quotidiano per costruire "qualcosa" da far scivolare su una rampa di legno. L''obiettivo? Arrivare per ultimi al traguardo! Riuscirai a sfruttare la fisica per rallentare?'),
+   'Usa materiali di uso quotidiano per costruire "qualcosa" da far scivolare su una rampa di legno. L''obiettivo? Arrivare per ultimi al traguardo! Riuscirai a sfruttare la fisica per rallentare? Oltre ai turni prenotabili, il laboratorio resta ad accesso libero per tutta la serata.'),
   (2, 'Matematica', '#46b25e', '2026-07-24', '17:30', '22:00',
    'Labirinti matematici', 'Riuscirai a trovare l''uscita?', '6+', 'Corso Cavour', NULL, TRUE, 45, 5,
-   'Preparati a perderti… nella matematica! Tra curve, incroci e scelte da fare, i labirinti matematici giganti mettono alla prova logica, calcoli e strategia. Un gioco a grandezza naturale dove ogni passo è un''operazione.'),
+   'Preparati a perderti… nella matematica! Tra curve, incroci e scelte da fare, i labirinti matematici giganti mettono alla prova logica, calcoli e strategia. Un gioco a grandezza naturale dove ogni passo è un''operazione. Oltre ai turni prenotabili, il laboratorio resta ad accesso libero per tutta la serata.'),
   (3, 'Astronomia', '#6a5cc7', '2026-07-24', '17:30', '21:45',
    'Costruiamo l''astrolabio', 'Il fascino del cielo visto da vicino', '8+', 'Piazza Bartolo', NULL, TRUE, 45, 20,
    'Portati a casa una notte stellata. Esploriamo le maggiori costellazioni del nostro cielo e i miti che le animano. Costruiamo insieme un astrolabio per orientarci nella volta celeste.'),
