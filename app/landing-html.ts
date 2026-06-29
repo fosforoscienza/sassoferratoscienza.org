@@ -3,8 +3,8 @@ export const LANDING_HTML = `
 <!-- ===================== HEADER ===================== -->
     <header class="site-header">
       <div class="site-header__inner">
-        <a href="#top" class="site-header__brand" aria-label="Fosforo, la festa della scienza">
-          <img src="assets/logo-fosforo.png" alt="Fosforo, la festa della scienza">
+        <a href="#top" class="site-header__brand" aria-label="Sassoferrato Scienza">
+          <span class="brand-text">Sassoferrato <span class="brand-text__accent">Scienza</span></span>
         </a>
         <nav class="site-nav" aria-label="Navigazione principale">
           <a href="#programma">Programma</a>
@@ -22,7 +22,6 @@ export const LANDING_HTML = `
     <section id="top" class="hero">
       <div class="hero__grid">
         <div data-reveal>
-          <div class="hero__eyebrow"><span></span>Fosforo · la festa della scienza</div>
           <h1 class="hero__title">
             <span>Giochiamo</span>
             <span>con la</span>
@@ -88,7 +87,7 @@ export const LANDING_HTML = `
     <section id="programma" class="section">
       <div class="container">
         <div class="section-head" data-reveal>
-          <div class="eyebrow">01 — I laboratori</div>
+          <div class="eyebrow">I laboratori</div>
           <h2 id="laboratori">Mettiti alla prova,<br>esperimento dopo esperimento</h2>
           <p>Cinque laboratori per scoprire la fisica, la matematica, l'astronomia, la natura e i sensi. Tutti gratuiti e <strong>su prenotazione</strong> su sassoferratoscienza.org.</p>
         </div>
@@ -98,7 +97,6 @@ export const LANDING_HTML = `
         <div class="lab-grid">
 
           <article class="lab-card lab-card--blue" data-reveal>
-            <div class="lab-card__num">01</div>
             <div class="lab-card__cat"><span></span>Tinkering</div>
             <h3 class="lab-card__title">Discesa libera</h3>
             <p class="lab-card__sub">Si freni chi può</p>
@@ -111,7 +109,6 @@ export const LANDING_HTML = `
           </article>
 
           <article class="lab-card lab-card--green" data-reveal data-reveal-delay="70">
-            <div class="lab-card__num">02</div>
             <div class="lab-card__cat"><span></span>Matematica</div>
             <h3 class="lab-card__title">Labirinti matematici</h3>
             <p class="lab-card__sub">Riuscirai a trovare l'uscita?</p>
@@ -124,7 +121,6 @@ export const LANDING_HTML = `
           </article>
 
           <article class="lab-card lab-card--indigo" data-reveal data-reveal-delay="140">
-            <div class="lab-card__num">03</div>
             <div class="lab-card__cat"><span></span>Astronomia</div>
             <h3 class="lab-card__title">Costruiamo l'astrolabio</h3>
             <p class="lab-card__sub">Il fascino del cielo visto da vicino</p>
@@ -138,7 +134,6 @@ export const LANDING_HTML = `
           </article>
 
           <article class="lab-card lab-card--teal" data-reveal>
-            <div class="lab-card__num">04</div>
             <div class="lab-card__cat"><span></span>Natura · VR</div>
             <h3 class="lab-card__title">La natura a 360°</h3>
             <p class="lab-card__sub">Le aree naturalistiche delle Marche nei visori VR</p>
@@ -152,7 +147,6 @@ export const LANDING_HTML = `
           </article>
 
           <article class="lab-card lab-card--pink" data-reveal data-reveal-delay="70">
-            <div class="lab-card__num">05</div>
             <div class="lab-card__cat"><span></span>Percezione</div>
             <h3 class="lab-card__title">Occhio all'illusione</h3>
             <p class="lab-card__sub">Lasciamoci ingannare</p>
@@ -181,7 +175,7 @@ export const LANDING_HTML = `
         <div class="show-panel">
           <div class="show-panel__grid">
             <div class="show-panel__body" data-reveal>
-              <div class="eyebrow show-panel__eyebrow">02 — Science Show</div>
+              <div class="eyebrow show-panel__eyebrow">Science Show</div>
               <h2>La scienza<br>fa spettacolo!</h2>
               <p>Il Dottor Brown stupirà il pubblico con divertenti e interessantissimi esperimenti scientifici di varie forme e colori.</p>
               <div class="show-box">
@@ -210,7 +204,7 @@ export const LANDING_HTML = `
       <div class="finale__bg" aria-hidden="true"><img src="assets/spiral.png" alt=""></div>
       <div class="finale__grid">
         <div data-reveal>
-          <div class="eyebrow finale__eyebrow">03 — Gran finale in musica</div>
+          <div class="eyebrow finale__eyebrow">Gran finale in musica</div>
           <h2>“Ancora Tu”</h2>
           <p class="finale__sub">Omaggio a Lucio Battisti con i Big Cedars</p>
           <span class="finale__chip"><span></span>ORE 21:30 · PIAZZA BARTOLO</span>
@@ -229,7 +223,7 @@ export const LANDING_HTML = `
     <section id="territorio" class="section terr">
       <div class="terr-grid">
         <div data-reveal>
-          <div class="eyebrow terr__eyebrow">04 — Tra scienza e territorio</div>
+          <div class="eyebrow terr__eyebrow">Tra scienza e territorio</div>
           <h2>I sapori del territorio</h2>
           <p>Tra un laboratorio e una scoperta, concediti una pausa tra i sapori del territorio. Durante tutta la manifestazione saranno presenti stand gastronomici con la tradizionale polenta Ottofile di Mais Rosso di Roccacontrada e altre specialità locali.</p>
           <p>Un'occasione per conoscere una varietà storica recuperata e valorizzata nel territorio di Arcevia: simbolo di una tradizione agricola che continua a vivere ancora oggi.</p>
@@ -372,7 +366,7 @@ export const LANDING_HTML = `
       <div class="container">
         <div class="footer-grid">
           <div>
-            <img class="footer__logo" src="assets/logo-fosforo.png" alt="Fosforo, la festa della scienza">
+            <span class="footer-brand">Sassoferrato <span class="footer-brand__accent">Scienza</span></span>
             <p class="footer__about">La festa della scienza arriva a Sassoferrato. Una giornata di laboratori, spettacoli e meraviglia per tutta la famiglia.</p>
           </div>
           <div>

@@ -9,7 +9,7 @@ import { isAllowedOrigin } from '@/lib/csrf'
  * Massimo numero di posti che una singola email può prenotare per uno stesso
  * scope (evento per i lab non a turni; turno per i lab a turni).
  */
-const MAX_POSTI_PER_EMAIL_SCOPE = 5
+const MAX_POSTI_PER_EMAIL_SCOPE = 3
 
 const PrenotaSchema = z.object({
   evento_id: z.string().uuid(),
@@ -19,7 +19,7 @@ const PrenotaSchema = z.object({
   email: z.string().trim().email().max(160),
   telefono: z.string().trim().max(40).optional().nullable(),
   cap: z.string().trim().regex(/^\d{5}$/, 'CAP non valido: 5 cifre'),
-  n_persone: z.coerce.number().int().min(1).max(20),
+  n_persone: z.coerce.number().int().min(1).max(3),
   note: z.string().trim().max(500).optional().nullable(),
   privacy_consent: z.literal(true, { errorMap: () => ({ message: 'Devi accettare l\'informativa privacy' }) }),
 })

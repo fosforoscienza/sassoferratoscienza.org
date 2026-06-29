@@ -34,7 +34,7 @@ export default function PrenotaForm({ eventoId, turni, initialTurno }: Props) {
   })
 
   const turnoScelto = turniDisponibili.find(t => t.id === turnoSelezionato)
-  const maxPersone = isATurni ? Math.min(5, turnoScelto?.posti_residui ?? 5) : 5
+  const maxPersone = isATurni ? Math.min(3, turnoScelto?.posti_residui ?? 3) : 3
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -57,7 +57,6 @@ export default function PrenotaForm({ eventoId, turni, initialTurno }: Props) {
       telefono: formData.get('telefono') || null,
       cap: formData.get('cap'),
       n_persone: Number(formData.get('n_persone') ?? 1),
-      note: formData.get('note') || null,
       privacy_consent: privacyOk,
     }
 
@@ -199,23 +198,9 @@ export default function PrenotaForm({ eventoId, turni, initialTurno }: Props) {
             defaultValue={1}
             required
             className="input-base"
-            title={isATurni ? `Massimo ${maxPersone} posti su questo turno` : 'Massimo 5 posti per laboratorio dalla stessa email'}
+            title={isATurni ? `Massimo ${maxPersone} posti su questo turno` : 'Massimo 3 posti per laboratorio'}
           />
         </div>
-      </div>
-
-      <div>
-        <label htmlFor="note" className="label-base">
-          Note <span className="text-slate-400">(opzionale)</span>
-        </label>
-        <textarea
-          id="note"
-          name="note"
-          maxLength={500}
-          rows={3}
-          className="input-base resize-none"
-          placeholder="Eventuali esigenze particolari…"
-        />
       </div>
 
       <label

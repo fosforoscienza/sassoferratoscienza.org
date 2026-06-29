@@ -101,6 +101,32 @@ button { font: inherit; }
 .lab-card--cta h3 { color: #fff; }
 .book-card h2 { color: #fff; }
 
+/* Wordmark testuale (sostituisce il logo Fosforo) */
+.brand-text {
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 19px;
+  line-height: 1;
+  letter-spacing: .01em;
+  color: var(--title);
+  white-space: nowrap;
+}
+.brand-text__accent { color: var(--accent); }
+
+.footer-brand {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 25px;
+  line-height: 1;
+  letter-spacing: .01em;
+  color: #fff;
+  margin-bottom: 18px;
+}
+.footer-brand__accent { color: #7ec8ec; }
+
 /* Texture carta a tutta pagina (multiply, tenue) */
 .paper {
   position: fixed;
