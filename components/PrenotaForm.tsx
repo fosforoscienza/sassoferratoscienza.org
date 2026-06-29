@@ -11,9 +11,11 @@ type Props = {
   eventoId: string
   /** Se presente, il laboratorio è "a turni": l'utente deve sceglierne uno. */
   turni?: TurnoConDisponibilita[]
+  /** Turno da pre-selezionare (es. arrivando dal pallino della griglia orari). */
+  initialTurno?: string
 }
 
-export default function PrenotaForm({ eventoId, turni }: Props) {
+export default function PrenotaForm({ eventoId, turni, initialTurno }: Props) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -25,7 +27,11 @@ export default function PrenotaForm({ eventoId, turni }: Props) {
     [turni]
   )
 
-  const [turnoSelezionato, setTurnoSelezionato] = useState<string>('')
+  const [turnoSelezionato, setTurnoSelezionato] = useState<string>(() => {
+    if (!initialTurno) return ''
+    const ok = (turni ?? []).some(t => t.id === initialTurno && t.posti_residui > 0)
+    return ok ? initialTurno : ''
+  })
 
   const turnoScelto = turniDisponibili.find(t => t.id === turnoSelezionato)
   const maxPersone = isATurni ? Math.min(5, turnoScelto?.posti_residui ?? 5) : 5

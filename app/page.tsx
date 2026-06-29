@@ -16,27 +16,29 @@ function publicClient() {
 }
 
 type EventoLite = { id: string; numero: number; titolo: string; colore: string; a_turni: boolean }
+type TurnoLite = { time: string; id: string }
 
-function buildOrariGrid(eventi: EventoLite[], turniByEvento: Map<string, string[]>): string {
+function buildOrariGrid(eventi: EventoLite[], turniByEvento: Map<string, TurnoLite[]>): string {
   // Laboratori a turni, in ordine; colonne = unione degli orari di inizio turno
   const labs = eventi.filter(e => (turniByEvento.get(e.id)?.length ?? 0) > 0)
   const allTimes = new Set<string>()
-  for (const lab of labs) for (const t of turniByEvento.get(lab.id) ?? []) allTimes.add(t)
+  for (const lab of labs) for (const t of turniByEvento.get(lab.id) ?? []) allTimes.add(t.time)
   const times = Array.from(allTimes).sort()
   if (!labs.length || !times.length) return ''
 
   const head = times.map(t => `<th>${t}</th>`).join('')
   const rows = labs
     .map(e => {
-      const labTimes = new Set(turniByEvento.get(e.id) ?? [])
+      const byTime = new Map((turniByEvento.get(e.id) ?? []).map(t => [t.time, t.id]))
       const cells = times
-        .map(t =>
-          labTimes.has(t)
-            ? `<td><a class="orari-dot" href="/prenota/${e.id}" style="background:${e.colore}" aria-label="${e.titolo} — turno delle ${t}"></a></td>`
+        .map(t => {
+          const tid = byTime.get(t)
+          return tid
+            ? `<td><a class="orari-dot" href="/prenota/${e.id}?turno=${tid}" style="background:${e.colore}" aria-label="${e.titolo} — prenota il turno delle ${t}"></a></td>`
             : `<td><span class="orari-dot orari-dot--empty" aria-hidden="true"></span></td>`
-        )
+        })
         .join('')
-      return `<tr style="--c:${e.colore}"><th scope="row"><span class="orari-num">${String(e.numero).padStart(2, '0')}</span>${e.titolo}</th>${cells}</tr>`
+      return `<tr style="--c:${e.colore}"><th scope="row"><a class="orari-lab" href="/prenota/${e.id}">${e.titolo}</a></th>${cells}</tr>`
     })
     .join('')
 
@@ -48,7 +50,7 @@ function buildOrariGrid(eventi: EventoLite[], turniByEvento: Map<string, string[
           <tbody>${rows}</tbody>
         </table>
       </div>
-      <p class="orari__note">Ogni pallino è un turno prenotabile: cliccalo per prenotare. Negli altri orari l'accesso ai laboratori è libero.</p>
+      <p class="orari__note">Clicca il <strong>nome</strong> per vedere tutti i turni, o un <strong>pallino</strong> per prenotare direttamente quel turno. Negli altri orari l'accesso ai laboratori è libero.</p>
     </div>`
 }
 
@@ -58,13 +60,13 @@ export default async function Home() {
     const supabase = publicClient()
     const [{ data: eventi }, { data: turni }] = await Promise.all([
       supabase.from('sass_eventi').select('id, numero, titolo, colore, a_turni').order('numero', { ascending: true }),
-      supabase.from('sass_turni').select('evento_id, ora_inizio').order('ora_inizio', { ascending: true }),
+      supabase.from('sass_turni').select('id, evento_id, ora_inizio').order('ora_inizio', { ascending: true }),
     ])
-    const turniByEvento = new Map<string, string[]>()
+    const turniByEvento = new Map<string, TurnoLite[]>()
     for (const t of turni ?? []) {
       const hhmm = String(t.ora_inizio).slice(0, 5)
       const arr = turniByEvento.get(t.evento_id) ?? []
-      if (!arr.includes(hhmm)) arr.push(hhmm)
+      if (!arr.some(x => x.time === hhmm)) arr.push({ time: hhmm, id: t.id })
       turniByEvento.set(t.evento_id, arr)
     }
     gridHtml = buildOrariGrid((eventi ?? []) as EventoLite[], turniByEvento)

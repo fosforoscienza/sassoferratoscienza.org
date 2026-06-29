@@ -22,7 +22,13 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   }
 }
 
-export default async function PrenotaEventoPage({ params }: { params: { id: string } }) {
+export default async function PrenotaEventoPage({
+  params,
+  searchParams,
+}: {
+  params: { id: string }
+  searchParams: { turno?: string }
+}) {
   const supabase = createClient()
   const { data } = await supabase
     .from('sass_eventi')
@@ -166,7 +172,11 @@ export default async function PrenotaEventoPage({ params }: { params: { id: stri
               all&apos;ingresso.
             </p>
             <div className="mt-5">
-              <PrenotaForm eventoId={evento.id} turni={evento.a_turni ? turni : undefined} />
+              <PrenotaForm
+                eventoId={evento.id}
+                turni={evento.a_turni ? turni : undefined}
+                initialTurno={typeof searchParams.turno === 'string' ? searchParams.turno : undefined}
+              />
             </div>
           </article>
         )}
