@@ -89,7 +89,7 @@ export const LANDING_HTML = `
         <div class="section-head" data-reveal>
           <div class="eyebrow">I laboratori</div>
           <h2 id="laboratori">Mettiti alla prova,<br>esperimento dopo esperimento</h2>
-          <p>Cinque laboratori per scoprire la fisica, la matematica, l'astronomia, la natura e i sensi. Tutti gratuiti e <strong>su prenotazione</strong> su sassoferratoscienza.org.</p>
+          <p>Cinque laboratori per scoprire la fisica, la matematica, l'astronomia, la natura e i sensi. Ogni pallino indica una replica da cliccare per prenotare il turno.</p>
         </div>
 
         <!--ORARI_GRID-->
