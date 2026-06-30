@@ -636,7 +636,7 @@ button { font: inherit; }
   color: var(--ink-2);
   margin: 0 0 22px;
 }
-.lab-card__link {
+.landing-root a.lab-card__link {
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -645,14 +645,14 @@ button { font: inherit; }
   font-weight: 700;
   letter-spacing: .04em;
   text-transform: uppercase;
-  color: var(--ink);
+  color: var(--c-text);
   text-decoration: none;
   border-bottom: 2px solid var(--c);
   padding-bottom: 2px;
   cursor: pointer;
   transition: color .2s;
 }
-.lab-card__link:hover { color: var(--c-text); }
+.landing-root a.lab-card__link:hover { color: var(--c); }
 
 /* Tag tecnico neutro */
 .tag {
