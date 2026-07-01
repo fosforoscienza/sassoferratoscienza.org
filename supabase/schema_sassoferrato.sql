@@ -299,7 +299,7 @@ INSERT INTO public.sass_eventi
   (numero, categoria, colore, data, ora_inizio, ora_fine, titolo, sottotitolo, eta, luogo, capienza_max, a_turni, durata_turno_min, capienza_turno, descrizione)
 VALUES
   (1, 'Tinkering', '#3db3e4', '2026-07-24', '17:30', '22:00',
-   'Discesa libera', 'Si freni chi può', '8+', 'Piazza Bartolo', NULL, TRUE, 45, 5,
+   'Discesa libera', 'Si freni chi può', '8+', 'Piazza Bartolo', NULL, TRUE, 45, 10,
    'Usa materiali di uso quotidiano per costruire "qualcosa" da far scivolare su una rampa di legno. L''obiettivo? Arrivare per ultimi al traguardo! Riuscirai a sfruttare la fisica per rallentare? Oltre ai turni prenotabili, il laboratorio resta ad accesso libero per tutta la serata.'),
   (2, 'Matematica', '#46b25e', '2026-07-24', '17:30', '22:00',
    'Labirinti matematici', 'Riuscirai a trovare l''uscita?', '6+', 'Corso Cavour', NULL, FALSE, NULL, NULL,
