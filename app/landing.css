@@ -1444,6 +1444,12 @@ button { font: inherit; }
   color: var(--accent);
   margin-bottom: 14px;
 }
+.orari__title-note {
+  text-transform: none;
+  letter-spacing: .01em;
+  font-weight: 600;
+  color: var(--ink-2);
+}
 .orari__scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .orari-table {
   width: 100%;

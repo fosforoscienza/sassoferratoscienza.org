@@ -130,7 +130,7 @@ function buildOrariGrid(eventi: EventoLite[], turniByEvento: Map<string, TurnoLi
     .join('')
 
   return `<div class="orari" data-reveal>
-      <div class="orari__title">Gli orari · venerdì 24 luglio</div>
+      <div class="orari__title">Gli orari · venerdì 24 luglio<span class="orari__title-note"> • Tutte le attività sono gratuite, alcune a prenotazione obbligatoria. Prenotate il posto solo per bambini.</span></div>
       <div class="orari__scroll">
         <table class="orari-table">
           <thead><tr><th scope="col">Laboratorio</th>${head}</tr></thead>
