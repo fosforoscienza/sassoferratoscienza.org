@@ -676,6 +676,28 @@ button { font: inherit; }
   box-shadow: 0 13px 26px -6px color-mix(in srgb, var(--c) 75%, transparent);
 }
 
+/* Badge "a fruizione libera" (sostituisce il pulsante Prenota) — allineato in basso */
+.lab-card__libera {
+  margin-top: auto;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 18px;
+  border-radius: 14px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .03em;
+  color: var(--c-text);
+  background: color-mix(in srgb, var(--c) 12%, transparent);
+  border: 1.5px solid color-mix(in srgb, var(--c) 28%, transparent);
+}
+.lab-card__libera::before {
+  content: "✓";
+  font-weight: 800;
+}
+
 /* Tag tecnico neutro */
 .tag {
   font-family: var(--font-mono);
@@ -1452,7 +1474,7 @@ button { font: inherit; }
 .orari-table thead th:first-child { text-align: left; }
 .orari-table tbody th[scope="row"] {
   text-align: left;
-  font-size: 14.5px;
+  font-size: 17px;
   font-weight: 800;
   color: var(--ink);
   white-space: nowrap;

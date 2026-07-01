@@ -117,7 +117,7 @@ export const LANDING_HTML = `
               <span class="tag tag--age">ETÀ 6+</span>
             </div>
             <p class="lab-card__desc">Preparati a perderti… nella matematica! Tra curve, incroci e scelte da fare, i labirinti matematici giganti mettono alla prova logica, calcoli e strategia. Un gioco a grandezza naturale dove ogni passo è un'operazione.</p>
-            <a href="/prenota" class="lab-card__link">Prenota →</a>
+            <span class="lab-card__libera">Attività a fruizione libera</span>
           </article>
 
           <article class="lab-card lab-card--indigo" data-reveal data-reveal-delay="140">

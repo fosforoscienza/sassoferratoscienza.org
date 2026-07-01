@@ -302,7 +302,7 @@ VALUES
    'Discesa libera', 'Si freni chi può', '8+', 'Piazza Bartolo', NULL, TRUE, 45, 5,
    'Usa materiali di uso quotidiano per costruire "qualcosa" da far scivolare su una rampa di legno. L''obiettivo? Arrivare per ultimi al traguardo! Riuscirai a sfruttare la fisica per rallentare? Oltre ai turni prenotabili, il laboratorio resta ad accesso libero per tutta la serata.'),
   (2, 'Matematica', '#46b25e', '2026-07-24', '17:30', '22:00',
-   'Labirinti matematici', 'Riuscirai a trovare l''uscita?', '6+', 'Corso Cavour', NULL, TRUE, 45, 5,
+   'Labirinti matematici', 'Riuscirai a trovare l''uscita?', '6+', 'Corso Cavour', NULL, FALSE, NULL, NULL,
    'Preparati a perderti… nella matematica! Tra curve, incroci e scelte da fare, i labirinti matematici giganti mettono alla prova logica, calcoli e strategia. Un gioco a grandezza naturale dove ogni passo è un''operazione. Oltre ai turni prenotabili, il laboratorio resta ad accesso libero per tutta la serata.'),
   (3, 'Astronomia', '#6a5cc7', '2026-07-24', '17:30', '21:45',
    'Costruiamo l''astrolabio', 'Il fascino del cielo visto da vicino', '8+', 'Piazza Bartolo', NULL, TRUE, 45, 20,
@@ -324,10 +324,6 @@ JOIN (VALUES
   (1, '18:30', '19:15', 1),
   (1, '19:30', '20:15', 2),
   (1, '21:00', '21:45', 3),
-  (2, '17:30', '18:15', 0),
-  (2, '18:30', '19:15', 1),
-  (2, '19:30', '20:15', 2),
-  (2, '21:00', '21:45', 3),
   (3, '17:30', '18:15', 0),
   (3, '21:00', '21:45', 1),
   (4, '17:30', '18:15', 0),
@@ -338,6 +334,9 @@ JOIN (VALUES
   (5, '21:00', '21:45', 3)
 ) AS s(numero, ora_inizio, ora_fine, ordine) ON s.numero = e.numero
 ON CONFLICT (evento_id, data, ora_inizio) DO NOTHING;
+
+-- Labirinti matematici: attività a fruizione libera (nessuna prenotazione)
+UPDATE public.sass_eventi SET prenotazioni_attive = FALSE WHERE numero = 2;
 
 -- ============================================================
 -- Per promuovere il primo admin (eseguire manualmente):
