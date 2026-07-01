@@ -1267,15 +1267,15 @@ button { font: inherit; }
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  padding: 17px 32px;
-  border-radius: var(--radius-pill);
+  padding: 15px 26px;
+  border-radius: 14px;
   background: #fff;
   color: #6a4fbf;
-  font-weight: 900;
-  font-size: 16px;
+  font-weight: 800;
+  font-size: 15px;
   text-decoration: none;
   cursor: pointer;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, .22);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .18);
   transition: transform .25s var(--ease), box-shadow .25s var(--ease);
 }
 .book-card .btn-cta:hover {
