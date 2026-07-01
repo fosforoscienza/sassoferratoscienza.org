@@ -563,17 +563,24 @@ button { font: inherit; }
 
 .lab-card {
   position: relative;
+  /* Sfondo con tinta leggera del colore del laboratorio (fallback: crema) */
   background: var(--surface);
-  border: 1px solid var(--surface-border);
+  background: linear-gradient(165deg, color-mix(in srgb, var(--c) 10%, var(--surface)), var(--surface) 60%);
+  /* Bordo colorato tenue (fallback: neutro) */
+  border: 1.5px solid var(--surface-border);
+  border: 1.5px solid color-mix(in srgb, var(--c) 30%, transparent);
   border-radius: var(--radius-card);
   padding: 30px 26px 24px;
   overflow: hidden;
-  box-shadow: var(--shadow-card);
-  transition: transform .45s var(--ease), box-shadow .35s, border-color .35s;
+  /* Ombra soffusa nel colore del laboratorio (fallback: neutra) */
+  box-shadow: 0 12px 30px -18px rgba(0, 0, 0, .28);
+  box-shadow: 0 16px 36px -20px color-mix(in srgb, var(--c) 62%, transparent), 0 2px 6px rgba(0, 0, 0, .04);
+  transition: transform .4s var(--ease), box-shadow .35s, border-color .35s;
 }
 .lab-card:hover {
   transform: translateY(-6px);
   box-shadow: var(--shadow-card-hover);
+  box-shadow: 0 24px 48px -20px color-mix(in srgb, var(--c) 78%, transparent), 0 4px 10px rgba(0, 0, 0, .06);
   border-color: var(--c);
 }
 .lab-card::before {
@@ -582,6 +589,7 @@ button { font: inherit; }
   top: 0; left: 0; right: 0;
   height: 5px;
   background: var(--c);
+  background: linear-gradient(90deg, var(--c), color-mix(in srgb, var(--c) 55%, #ffffff));
 }
 .lab-card__num {
   position: absolute;
@@ -639,20 +647,29 @@ button { font: inherit; }
 .landing-root a.lab-card__link {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
+  padding: 11px 22px;
+  border-radius: var(--radius-pill);
   font-family: var(--font-mono);
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: .04em;
+  letter-spacing: .05em;
   text-transform: uppercase;
-  color: var(--c-text);
+  color: #fff;
   text-decoration: none;
-  border-bottom: 2px solid var(--c);
-  padding-bottom: 2px;
+  border: none;
+  /* Pulsante pieno nel colore del laboratorio (fallback: tonalità testo) */
+  background: var(--c-text);
+  background: linear-gradient(135deg, var(--c-text), var(--c-chip-text));
+  box-shadow: 0 8px 18px -6px rgba(0, 0, 0, .3);
+  box-shadow: 0 9px 20px -6px color-mix(in srgb, var(--c) 65%, transparent);
   cursor: pointer;
-  transition: color .2s;
+  transition: transform .2s var(--ease), box-shadow .2s;
 }
-.landing-root a.lab-card__link:hover { color: var(--c); }
+.landing-root a.lab-card__link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 13px 26px -6px color-mix(in srgb, var(--c) 75%, transparent);
+}
 
 /* Tag tecnico neutro */
 .tag {
