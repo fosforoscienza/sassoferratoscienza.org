@@ -50,7 +50,6 @@ function buildOrariGrid(eventi: EventoLite[], turniByEvento: Map<string, TurnoLi
           <tbody>${rows}</tbody>
         </table>
       </div>
-      <p class="orari__note">Clicca il <strong>nome</strong> per vedere tutti i turni, o un <strong>pallino</strong> per prenotare direttamente quel turno. Negli altri orari l'accesso ai laboratori è libero.</p>
     </div>`
 }
 

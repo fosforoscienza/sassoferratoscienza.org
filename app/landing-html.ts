@@ -343,20 +343,18 @@ export const LANDING_HTML = `
     <!-- ===================== PARTNER ===================== -->
     <section class="partners">
       <div class="container" data-reveal>
-        <div class="partners__label">Promosso da</div>
-        <div class="partners__row partners__row--promo">
-          <div class="partner-logo partner-logo--lg"><img src="assets/crest-sassoferrato.png" alt="Comune di Sassoferrato" style="max-height:60px"></div>
-          <div class="partner-logo partner-logo--lg"><img src="assets/logo-proloco.png" alt="Pro Loco Sassoferrato" style="max-height:64px"></div>
-          <div class="partner-logo partner-logo--lg wide"><img src="assets/logo-fosforo.png" alt="Fosforo, la festa della scienza" style="max-height:40px"></div>
-          <div class="partner-logo partner-logo--lg narrow"><img src="assets/logo-borghi.png" alt="Uno dei Borghi più belli d'Italia" style="max-height:70px"></div>
-        </div>
-        <div class="partners__label">Con il sostegno di</div>
-        <div class="partners__row">
-          <div class="partner-logo partner-logo--sm"><img src="assets/logo-cariverona.png" alt="Fondazione Cariverona" style="max-height:44px"></div>
-          <div class="partner-logo partner-logo--sm"><img src="assets/logo-ambito.png" alt="Ambito Territoriale" style="max-height:50px"></div>
-          <div class="partner-logo partner-logo--sm" style="min-width:140px"><img src="assets/logo-epic.png" alt="EPIC" style="max-height:52px"></div>
-          <div class="partner-logo partner-logo--sm" style="min-width:130px"><img src="assets/logo-itinera.png" alt="Itinera" style="max-height:56px"></div>
-          <div class="partner-logo partner-logo--sm" style="min-width:140px"><img src="assets/logo-teatropirata.png" alt="Teatro Giovani Teatro Pirata" style="max-height:54px"></div>
+        <div class="partners__strip">
+          <div class="partner-item"><div class="partner-logo"><img src="assets/logo-parrocchie.png" alt="Parrocchie di Sassoferrato" style="max-height:64px"></div></div>
+          <div class="partner-item"><span class="partner-cap">con il patrocinio</span><div class="partner-logo"><img src="assets/crest-sassoferrato.png" alt="Comune di Sassoferrato" style="max-height:60px"></div></div>
+          <div class="partner-item"><div class="partner-logo"><img src="assets/logo-borghi.png" alt="Uno dei Borghi più belli d'Italia" style="max-height:70px"></div></div>
+          <div class="partner-item"><div class="partner-logo"><img src="assets/logo-proloco.png" alt="Pro Loco Sassoferrato" style="max-height:64px"></div></div>
+          <div class="partner-item"><div class="partner-logo" style="min-width:172px"><img src="assets/logo-fosforo.png" alt="Fosforo, la festa della scienza" style="max-height:40px"></div></div>
+          <div class="partner-item"><span class="partner-cap">con il contributo di</span><div class="partner-logo" style="min-width:182px"><img src="assets/logo-fondazionecr.png" alt="Fondazione CR Fabriano e Cupramontana" style="max-height:46px"></div></div>
+          <div class="partner-item"><div class="partner-logo" style="min-width:140px"><img src="assets/logo-epic.png" alt="EPIC" style="max-height:52px"></div></div>
+          <div class="partner-item"><div class="partner-logo"><img src="assets/logo-ambito.png" alt="Ambito Territoriale" style="max-height:50px"></div></div>
+          <div class="partner-item"><div class="partner-logo" style="min-width:150px"><img src="assets/logo-teatropirata.png" alt="Teatro Giovani Teatro Pirata" style="max-height:54px"></div></div>
+          <div class="partner-item"><div class="partner-logo" style="min-width:140px"><img src="assets/logo-itinera.png" alt="Itinera" style="max-height:56px"></div></div>
+          <div class="partner-item"><span class="partner-cap">con il sostegno di</span><div class="partner-logo"><img src="assets/logo-cariverona.png" alt="Fondazione Cariverona" style="max-height:44px"></div></div>
         </div>
       </div>
     </section>
