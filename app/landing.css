@@ -563,6 +563,8 @@ button { font: inherit; }
 
 .lab-card {
   position: relative;
+  display: flex;
+  flex-direction: column;
   /* Sfondo con tinta leggera del colore del laboratorio (fallback: crema) */
   background: var(--surface);
   background: linear-gradient(165deg, color-mix(in srgb, var(--c) 10%, var(--surface)), var(--surface) 60%);
@@ -648,8 +650,11 @@ button { font: inherit; }
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 11px 22px;
-  border-radius: var(--radius-pill);
+  /* Allineati in basso, alla stessa altezza in tutte le card della riga */
+  margin-top: auto;
+  align-self: flex-start;
+  padding: 12px 22px;
+  border-radius: 14px;
   font-family: var(--font-mono);
   font-size: 12px;
   font-weight: 700;
