@@ -105,7 +105,7 @@ export const LANDING_HTML = `
               <span class="tag tag--age">ETÀ 8+</span>
             </div>
             <p class="lab-card__desc">Usa materiali di uso quotidiano per costruire "qualcosa" da far scivolare su una rampa di legno. L'obiettivo? Arrivare per ultimi al traguardo! Riuscirai a sfruttare la fisica per rallentare?</p>
-            <a href="/prenota" class="lab-card__link">Prenota →</a>
+            <a href="/prenota/__LAB1__" class="lab-card__link">Prenota →</a>
           </article>
 
           <article class="lab-card lab-card--green" data-reveal data-reveal-delay="70">
@@ -130,7 +130,7 @@ export const LANDING_HTML = `
               <span class="tag tag--age">ETÀ 8+</span>
             </div>
             <p class="lab-card__desc">Portati a casa una notte stellata. Esploriamo le maggiori costellazioni del nostro cielo e i miti che le animano. Costruiamo insieme un astrolabio per orientarci nella volta celeste.</p>
-            <a href="/prenota" class="lab-card__link">Prenota →</a>
+            <a href="/prenota/__LAB3__" class="lab-card__link">Prenota →</a>
           </article>
 
           <article class="lab-card lab-card--teal" data-reveal>
@@ -143,7 +143,7 @@ export const LANDING_HTML = `
               <span class="tag tag--age">ETÀ 8+</span>
             </div>
             <p class="lab-card__desc">All'interno del progetto "Tra borghi e natura", grazie ai visori di realtà virtuale immersivi a 360°, vivrai un video emozionale girato nei luoghi naturalistici più affascinanti delle Marche.</p>
-            <a href="/prenota" class="lab-card__link">Prenota →</a>
+            <a href="/prenota/__LAB4__" class="lab-card__link">Prenota →</a>
           </article>
 
           <article class="lab-card lab-card--pink" data-reveal data-reveal-delay="70">
@@ -155,7 +155,7 @@ export const LANDING_HTML = `
               <span class="tag tag--age">ETÀ 8+</span>
             </div>
             <p class="lab-card__desc">Scopriamo come funzionano occhi e cervello! Tra giochi, esperimenti e illusioni ottiche, seguiamo il viaggio della luce che entra nei nostri occhi e diventa le immagini che vediamo ogni giorno.</p>
-            <a href="/prenota" class="lab-card__link">Prenota →</a>
+            <a href="/prenota/__LAB5__" class="lab-card__link">Prenota →</a>
           </article>
 
           <article class="lab-card lab-card--cta" data-reveal data-reveal-delay="140">

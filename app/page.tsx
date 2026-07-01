@@ -142,6 +142,9 @@ function buildOrariGrid(eventi: EventoLite[], turniByEvento: Map<string, TurnoLi
 
 export default async function Home() {
   let gridHtml = ''
+  // Mappa numero laboratorio → id evento, per far puntare i pulsanti "Prenota"
+  // delle card direttamente alla prenotazione del singolo laboratorio.
+  const idByNumero = new Map<number, string>()
   try {
     const supabase = publicClient()
     const [{ data: eventi }, { data: turni }] = await Promise.all([
@@ -155,12 +158,20 @@ export default async function Home() {
       if (!arr.some(x => x.time === hhmm)) arr.push({ time: hhmm, id: t.id })
       turniByEvento.set(t.evento_id, arr)
     }
+    for (const e of (eventi ?? []) as EventoLite[]) idByNumero.set(e.numero, e.id)
     gridHtml = buildOrariGrid((eventi ?? []) as EventoLite[], turniByEvento)
   } catch (err) {
     console.error('[home] griglia orari non generata:', err)
   }
 
-  const html = LANDING_HTML.replace('<!--ORARI_GRID-->', gridHtml)
+  // Sostituisci i token __LABn__ con l'id reale del laboratorio.
+  // Fallback a /prenota (elenco) se l'evento non è stato caricato.
+  const html = LANDING_HTML
+    .replace('<!--ORARI_GRID-->', gridHtml)
+    .replace(/\/prenota\/__LAB(\d+)__/g, (_, n: string) => {
+      const id = idByNumero.get(Number(n))
+      return id ? `/prenota/${id}` : '/prenota'
+    })
 
   return (
     <div className="landing-root">
