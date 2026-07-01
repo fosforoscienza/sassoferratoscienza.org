@@ -5,6 +5,93 @@ import { LANDING_HTML } from './landing-html'
 // Rivalida la home (e quindi la griglia orari) ogni 5 minuti.
 export const revalidate = 300
 
+const SITE = 'https://sassoferratoscienza.org'
+
+// Dati strutturati (schema.org) per SEO/GEO: evento + FAQ.
+const JSONLD = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Festival',
+    name: 'Fosforo · la festa della scienza — Sassoferrato',
+    startDate: '2026-07-24T17:00:00+02:00',
+    endDate: '2026-07-24T22:00:00+02:00',
+    eventStatus: 'https://schema.org/EventScheduled',
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    description:
+      'Una giornata di laboratori scientifici, Science Show e gran finale in musica per tutta la famiglia, tra le piazze di Sassoferrato. Ingresso libero.',
+    image: `${SITE}/assets/logo-fosforo.png`,
+    url: SITE,
+    isAccessibleForFree: true,
+    inLanguage: 'it',
+    location: {
+      '@type': 'Place',
+      name: 'Piazza Bartolo e Corso Cavour',
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: 'Piazza Gaspare Bartolo, Corso Cavour',
+        addressLocality: 'Sassoferrato',
+        addressRegion: 'AN',
+        postalCode: '60041',
+        addressCountry: 'IT',
+      },
+    },
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'EUR',
+      availability: 'https://schema.org/InStock',
+      url: `${SITE}/prenota`,
+    },
+    organizer: { '@type': 'Organization', name: 'Sassoferrato Scienza', url: SITE },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: [
+      {
+        '@type': 'Question',
+        name: "Quanto costa l'ingresso?",
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: "L'ingresso è completamente libero e gratuito, per tutta la durata della manifestazione. Non serve biglietto.",
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'Devo prenotare i laboratori?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Sì, è possibile prenotare i laboratori su sassoferratoscienza.org. I posti sono limitati: ti consigliamo di prenotare in anticipo. Lo Science Show e il concerto sono a ingresso libero senza prenotazione.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'A che età sono adatte le attività?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: "Ci sono attività dai 6 anni in su. Ogni laboratorio indica l'età consigliata (6+ o 8+). Lo spettacolo del Dottor Brown è adatto a partire dai 6 anni ed è pensato per tutta la famiglia.",
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'Si può mangiare sul posto?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Sì! Saranno presenti stand gastronomici con la tradizionale polenta Ottofile di Mais Rosso di Roccacontrada e altre specialità locali lungo tutto il percorso della festa.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'Dove si svolge la festa?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: "In Piazza Bartolo e lungo Corso Cavour, nel cuore del centro storico di Sassoferrato (AN), uno dei Borghi più belli d'Italia.",
+        },
+      },
+    ],
+  },
+]
+
 // Client Supabase pubblico (senza cookie) per la lettura dei laboratori/turni:
 // le tabelle sass_eventi e sass_turni hanno policy di lettura pubblica.
 function publicClient() {
@@ -77,6 +164,10 @@ export default async function Home() {
 
   return (
     <div className="landing-root">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(JSONLD) }}
+      />
       <div className="paper" aria-hidden="true" />
       <div className="page" dangerouslySetInnerHTML={{ __html: html }} />
       <LandingInteractions />

@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: 'Fosforo · la festa della scienza — Sassoferrato, 24 luglio 2026',
   description:
-    'Fosforo, la festa della scienza arriva a Sassoferrato venerdì 24 luglio 2026, dalle 17 alle 22 in Piazza Bartolo e Corso Cavour. Laboratori, Science Show, gran finale in musica e i sapori del territorio. Ingresso libero.',
+    'Laboratori scientifici, Science Show e gran finale in musica a Sassoferrato: venerdì 24 luglio 2026, ore 17–22, Piazza Bartolo e Corso Cavour. Ingresso libero.',
   alternates: { canonical: '/' },
   openGraph: {
     type: 'website',
