@@ -138,8 +138,8 @@ export const LANDING_HTML = `
             <h3 class="lab-card__title">La natura a 360°</h3>
             <p class="lab-card__sub">Le aree naturalistiche delle Marche nei visori VR</p>
             <div class="lab-card__meta">
-              <span class="tag">17.30 &amp; 21.00</span>
-              <span class="tag">45 MIN</span>
+              <span class="tag">17.30–18.00 &amp; 21.00–21.45</span>
+              <span class="tag">15 MIN</span>
               <span class="tag tag--age">ETÀ 8+</span>
             </div>
             <p class="lab-card__desc">All'interno del progetto "Tra borghi e natura", grazie ai visori di realtà virtuale immersivi a 360°, vivrai un video emozionale girato nei luoghi naturalistici più affascinanti delle Marche.</p>
