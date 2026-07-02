@@ -6,7 +6,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://sassoferratoscienz
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: 'Fosforo · la festa della scienza — Sassoferrato, 24 luglio 2026',
+  title: 'Sassoferrato Scienza — 24 luglio 2026',
   description:
     'Laboratori scientifici, Science Show e gran finale in musica a Sassoferrato: venerdì 24 luglio 2026, ore 17–22, Piazza Bartolo e Corso Cavour. Ingresso libero.',
   alternates: { canonical: '/' },
@@ -14,18 +14,18 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'it_IT',
     siteName: 'Sassoferrato Scienza',
-    title: 'Fosforo · la festa della scienza — Sassoferrato 2026',
+    title: 'Sassoferrato Scienza — 24 luglio 2026',
     description:
       'Venerdì 24 luglio 2026, dalle 17 alle 22. Laboratori, Science Show e gran finale in musica nel centro storico di Sassoferrato. Ingresso libero.',
     url: '/',
-    images: ['/assets/logo-fosforo.png'],
+    images: ['/assets/spiral.png'],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Fosforo · la festa della scienza — Sassoferrato 2026',
+    title: 'Sassoferrato Scienza — 24 luglio 2026',
     description:
       'Venerdì 24 luglio 2026, dalle 17 alle 22 a Sassoferrato. Laboratori, Science Show e gran finale in musica. Ingresso libero.',
-    images: ['/assets/logo-fosforo.png'],
+    images: ['/assets/spiral.png'],
   },
   icons: { icon: '/assets/favicon.svg' },
 }
