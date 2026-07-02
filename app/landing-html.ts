@@ -275,13 +275,8 @@ export const LANDING_HTML = `
             <a class="btn btn--primary" href="https://www.google.com/maps/search/?api=1&amp;query=Piazza+Gaspare+Bartolo+Sassoferrato" target="_blank" rel="noopener">Apri in Google Maps →</a>
           </div>
 
-          <div class="map" data-reveal data-reveal-delay="120" role="img" aria-label="Mappa stilizzata di Piazza Bartolo a Sassoferrato">
-            <div class="map__road--1"></div>
-            <div class="map__road--2"></div>
-            <div class="map__road--3"></div>
-            <div class="map__pin"><div class="map__pin-mark"><span></span></div></div>
-            <div class="map__label">Piazza Bartolo</div>
-            <div class="map__credit">Sassoferrato · AN</div>
+          <div class="map" data-reveal data-reveal-delay="120">
+            <iframe class="map__frame" title="Mappa · Piazza Bartolo, Sassoferrato (AN)" src="https://www.google.com/maps?q=Piazza%20Gaspare%20Bartolo%2C%20Sassoferrato%20AN&amp;z=16&amp;output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
           </div>
         </div>
       </div>
