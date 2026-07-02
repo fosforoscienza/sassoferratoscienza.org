@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 export default function Logo({
   variant = 'dark',
   height = 30,
@@ -6,16 +5,16 @@ export default function Logo({
   variant?: 'dark' | 'light'
   height?: number
 }) {
+  const isLight = variant === 'light'
   return (
-    <img
-      src="/assets/logo-fosforo.png"
-      alt="Fosforo, la festa della scienza"
-      height={height}
-      style={{
-        height,
-        width: 'auto',
-        filter: variant === 'light' ? 'brightness(0) invert(1)' : undefined,
-      }}
-    />
+    <span
+      className={`font-display font-extrabold uppercase leading-none whitespace-nowrap ${
+        isLight ? 'text-white' : 'text-brown'
+      }`}
+      style={{ fontSize: Math.round(height * 0.82) }}
+    >
+      Sassoferrato{' '}
+      <span className={isLight ? 'text-sass-300' : 'text-sass-500'}>Scienza</span>
+    </span>
   )
 }

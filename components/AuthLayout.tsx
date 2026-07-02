@@ -34,12 +34,7 @@ export function AuthLayout({
         </div>
 
         <div className="mb-6 flex flex-col items-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/90">
-            Sassoferrato Scienza
-          </p>
-          <div className="mt-3">
-            <Logo variant="light" height={34} />
-          </div>
+          <Logo variant="light" height={34} />
         </div>
 
         <div className="rounded-3xl bg-white/95 p-8 shadow-2xl backdrop-blur-sm">
