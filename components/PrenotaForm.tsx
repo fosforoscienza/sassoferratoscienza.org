@@ -100,6 +100,16 @@ export default function PrenotaForm({ eventoId, turni, initialTurno }: Props) {
               {(turni ?? []).map(t => {
                 const esaurito = t.posti_residui <= 0
                 const selected = turnoSelezionato === t.id
+                // Riempimento: verde → ambra → arancione → rosso (pieno)
+                const ratio = t.capienza > 0 ? t.posti_prenotati / t.capienza : 0
+                const postiClass =
+                  ratio >= 1
+                    ? 'font-semibold text-red-600'
+                    : ratio >= 0.75
+                      ? 'font-semibold text-orange-600'
+                      : ratio >= 0.4
+                        ? 'text-amber-600'
+                        : 'text-emerald-600'
                 return (
                   <label
                     key={t.id}
@@ -125,8 +135,8 @@ export default function PrenotaForm({ eventoId, turni, initialTurno }: Props) {
                         {formatRangeOrario(t.ora_inizio, t.ora_fine)}
                       </span>
                     </span>
-                    <span className={`text-xs ${esaurito ? 'font-semibold text-red-600' : 'text-slate-500'}`}>
-                      {esaurito ? 'esaurito' : `${t.posti_residui} / ${t.capienza} posti`}
+                    <span className={`text-xs ${postiClass}`}>
+                      {t.posti_prenotati}/{t.capienza} posti
                     </span>
                   </label>
                 )

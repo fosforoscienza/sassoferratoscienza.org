@@ -169,7 +169,7 @@ export default async function PrenotaEventoPage({
             <h2 className="font-display text-2xl font-bold text-brown">I tuoi dati</h2>
             <p className="mt-1 text-sm text-ink-soft">
               Riceverai un&apos;email all&apos;indirizzo che inserisci qui sotto, con il QR code da mostrare
-              all&apos;ingresso.
+              all&apos;inizio.
             </p>
             <div className="mt-5">
               <PrenotaForm

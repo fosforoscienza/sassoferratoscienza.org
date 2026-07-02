@@ -32,7 +32,7 @@ export default function PrivacyPage() {
             <p className="mt-1">
               Raccogliamo nome, cognome, email, e (facoltativamente) telefono, CAP e note, al solo
               scopo di gestire la prenotazione ai laboratori, inviarti la conferma con il QR code di
-              accesso e gestire il check-in all&apos;ingresso.
+              accesso e gestire il check-in all&apos;inizio.
             </p>
           </div>
           <div>

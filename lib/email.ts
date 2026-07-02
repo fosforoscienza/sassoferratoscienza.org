@@ -53,7 +53,7 @@ export async function inviaEmailPrenotazione(args: EmailPrenotazioneArgs): Promi
 
               <tr><td style="padding:28px 32px 8px">
                 <p style="margin:0 0 6px;font-size:16px">Ciao <strong>${args.nome} ${args.cognome}</strong>,</p>
-                <p style="margin:0;font-size:15px;line-height:1.5">la tua prenotazione è confermata. Mostra il <strong>QR code</strong> qui sotto all'ingresso del laboratorio.</p>
+                <p style="margin:0;font-size:15px;line-height:1.5">la tua prenotazione è confermata. Mostra il <strong>QR code</strong> qui sotto all'inizio del laboratorio.</p>
               </td></tr>
 
               <tr><td style="padding:18px 32px 8px;text-align:center">

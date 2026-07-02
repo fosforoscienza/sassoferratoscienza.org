@@ -50,7 +50,7 @@ export default async function ConfermaPage({ params }: { params: { token: string
             <p className="mt-1 text-sm text-white/85">
               {prenotazione.check_in_at
                 ? 'Hai già fatto check-in a questo laboratorio.'
-                : 'Mostra il QR code all\'ingresso del laboratorio.'}
+                : 'Mostra il QR code all\'inizio del laboratorio.'}
             </p>
           </div>
 
