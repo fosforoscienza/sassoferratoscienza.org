@@ -16,6 +16,8 @@ async function requireAdmin() {
   return { supabase, ok: true as const }
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 function csvEscape(v: unknown): string {
   if (v === null || v === undefined) return ''
   const s = String(v)
@@ -38,6 +40,10 @@ export async function GET(req: Request) {
     .trim()
     .slice(0, 80)
   const onlyCheckin = url.searchParams.get('checkin') === '1'
+  const rawTurno = url.searchParams.get('turno')
+  const rawEvento = url.searchParams.get('evento')
+  const turnoId = rawTurno && UUID_RE.test(rawTurno) ? rawTurno : null
+  const eventoId = rawEvento && UUID_RE.test(rawEvento) ? rawEvento : null
 
   let matchingEventiIds: string[] = []
   if (q) {
@@ -56,6 +62,8 @@ export async function GET(req: Request) {
     .order('created_at', { ascending: false })
     .limit(10000)
 
+  if (turnoId) query = query.eq('turno_id', turnoId)
+  else if (eventoId) query = query.eq('evento_id', eventoId)
   if (onlyCheckin) query = query.not('check_in_at', 'is', null)
   if (q) {
     const personFilter = `nome.ilike.%${q}%,cognome.ilike.%${q}%,email.ilike.%${q}%`

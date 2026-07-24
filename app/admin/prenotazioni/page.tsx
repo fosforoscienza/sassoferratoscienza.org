@@ -1,15 +1,21 @@
 import { createClient } from '@/lib/supabase/server'
+import Link from 'next/link'
+import { formatRangeOrario } from '@/lib/types'
 
 export const revalidate = 0
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 export default async function AdminPrenotazioniPage({
   searchParams,
 }: {
-  searchParams: { checkin?: string; q?: string }
+  searchParams: { checkin?: string; q?: string; turno?: string; evento?: string }
 }) {
   const supabase = createClient()
 
   const rawQ = searchParams.q?.toLowerCase().replace(/[,:()*.\\%]/g, '').slice(0, 80).trim() ?? ''
+  const turnoId = searchParams.turno && UUID_RE.test(searchParams.turno) ? searchParams.turno : null
+  const eventoId = searchParams.evento && UUID_RE.test(searchParams.evento) ? searchParams.evento : null
 
   let matchingEventiIds: string[] = []
   if (rawQ) {
@@ -20,14 +26,40 @@ export default async function AdminPrenotazioniPage({
     matchingEventiIds = (ev ?? []).map(e => e.id)
   }
 
+  let filtroLabel: string | null = null
+  if (turnoId) {
+    const { data: turno } = await supabase
+      .from('sass_turni')
+      .select('ora_inizio, ora_fine, evento:sass_eventi(titolo)')
+      .eq('id', turnoId)
+      .maybeSingle()
+    if (turno) {
+      const ev = Array.isArray(turno.evento) ? turno.evento[0] : turno.evento
+      filtroLabel = `${(ev as { titolo: string } | null)?.titolo ?? 'Attività'} · ${formatRangeOrario(turno.ora_inizio, turno.ora_fine)}`
+    }
+  } else if (eventoId) {
+    const { data: ev } = await supabase
+      .from('sass_eventi')
+      .select('titolo')
+      .eq('id', eventoId)
+      .maybeSingle()
+    if (ev) filtroLabel = ev.titolo
+  }
+
   let query = supabase
     .from('sass_prenotazioni')
     .select(
       'id, nome, cognome, email, telefono, cap, n_persone, check_in_at, created_at, evento:sass_eventi(titolo, categoria, colore), turno:sass_turni(data, ora_inizio, ora_fine)'
     )
-    .order('created_at', { ascending: false })
     .limit(500)
 
+  query =
+    turnoId || eventoId
+      ? query.order('cognome').order('nome')
+      : query.order('created_at', { ascending: false })
+
+  if (turnoId) query = query.eq('turno_id', turnoId)
+  else if (eventoId) query = query.eq('evento_id', eventoId)
   if (searchParams.checkin === '1') {
     query = query.not('check_in_at', 'is', null)
   }
@@ -53,6 +85,25 @@ export default async function AdminPrenotazioniPage({
             {prenotazioni.length} prenotazion{prenotazioni.length === 1 ? 'e' : 'i'} · {totPersone} person{totPersone === 1 ? 'a' : 'e'}
             {searchParams.checkin === '1' ? ' · solo con check-in' : ''}
           </p>
+          {filtroLabel && (
+            <span className="mt-2 inline-flex items-center gap-2 rounded-full bg-sass-100 px-3 py-1 text-xs font-semibold text-sass-800">
+              {filtroLabel}
+              <Link
+                href={`/admin/prenotazioni${(() => {
+                  const params = new URLSearchParams({
+                    ...(searchParams.q ? { q: searchParams.q } : {}),
+                    ...(searchParams.checkin ? { checkin: searchParams.checkin } : {}),
+                  }).toString()
+                  return params ? `?${params}` : ''
+                })()}`}
+                aria-label="Rimuovi filtro"
+                title="Rimuovi filtro"
+                className="rounded-full text-sass-600 hover:text-sass-900"
+              >
+                ✕
+              </Link>
+            </span>
+          )}
         </div>
         <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
           <form className="flex flex-1 gap-2 sm:flex-none" method="get">
@@ -64,12 +115,16 @@ export default async function AdminPrenotazioniPage({
               className="input-base flex-1 sm:w-64 sm:flex-none"
             />
             {searchParams.checkin === '1' && <input type="hidden" name="checkin" value="1" />}
+            {turnoId && <input type="hidden" name="turno" value={turnoId} />}
+            {!turnoId && eventoId && <input type="hidden" name="evento" value={eventoId} />}
             <button type="submit" className="btn-primary shrink-0 px-4 py-2 text-sm">Cerca</button>
           </form>
           <a
             href={`/api/admin/prenotazioni/export?${new URLSearchParams({
               ...(searchParams.q ? { q: searchParams.q } : {}),
               ...(searchParams.checkin ? { checkin: searchParams.checkin } : {}),
+              ...(turnoId ? { turno: turnoId } : {}),
+              ...(!turnoId && eventoId ? { evento: eventoId } : {}),
             }).toString()}`}
             className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-sass-700 shadow-sm hover:border-sass-400"
             title="Scarica CSV con tutti i campi"

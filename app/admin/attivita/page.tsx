@@ -87,7 +87,7 @@ export default async function AdminAttivitaPage() {
                     {ev.luogo && <p className="truncate text-xs text-slate-500">{ev.luogo}</p>}
                   </div>
                   <Link
-                    href={`/admin/prenotazioni?q=${encodeURIComponent(ev.titolo)}`}
+                    href={`/admin/prenotazioni?evento=${ev.id}`}
                     className="shrink-0 text-xs font-semibold text-sass-700 hover:underline"
                   >
                     Vedi →
@@ -103,37 +103,49 @@ export default async function AdminAttivitaPage() {
                         const s = statsByKey.get(t.id) ?? { persone: 0, prenotazioni: 0, personeCheckin: 0 }
                         const ratio = t.capienza > 0 ? s.persone / t.capienza : 0
                         return (
-                          <li key={t.id} className="flex items-center justify-between text-sm">
-                            <span className="text-slate-600">{formatRangeOrario(t.ora_inizio, t.ora_fine)}</span>
-                            <span className="flex items-center gap-2">
-                              <span className={`font-mono text-xs font-semibold ${semaforoClass(ratio)}`}>
-                                {s.persone}/{t.capienza}
+                          <li key={t.id}>
+                            <Link
+                              href={`/admin/prenotazioni?turno=${t.id}`}
+                              className="-mx-2 flex items-center justify-between rounded-lg px-2 py-1 text-sm transition-colors hover:bg-sass-50 active:bg-sass-100"
+                            >
+                              <span className="text-slate-600">{formatRangeOrario(t.ora_inizio, t.ora_fine)}</span>
+                              <span className="flex items-center gap-2">
+                                <span className={`font-mono text-xs font-semibold ${semaforoClass(ratio)}`}>
+                                  {s.persone}/{t.capienza}
+                                </span>
+                                {s.personeCheckin > 0 && (
+                                  <span className="text-[10px] text-slate-400">✓{s.personeCheckin}</span>
+                                )}
+                                <span aria-hidden className="text-slate-300">›</span>
                               </span>
-                              {s.personeCheckin > 0 && (
-                                <span className="text-[10px] text-slate-400">✓{s.personeCheckin}</span>
-                              )}
-                            </span>
+                            </Link>
                           </li>
                         )
                       })
                     )}
                   </ul>
                 ) : (
-                  <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3 text-sm">
-                    <span className="text-slate-600">{formatRangeOrario(ev.ora_inizio, ev.ora_fine)}</span>
-                    <span className="flex items-center gap-2">
-                      <span
-                        className={`font-mono text-xs font-semibold ${
-                          ev.capienza_max ? semaforoClass(soloStats.persone / ev.capienza_max) : 'text-slate-500'
-                        }`}
-                      >
-                        {soloStats.persone}
-                        {ev.capienza_max ? `/${ev.capienza_max}` : ''}
+                  <div className="mt-3 border-t border-slate-100 pt-3">
+                    <Link
+                      href={`/admin/prenotazioni?evento=${ev.id}`}
+                      className="-mx-2 flex items-center justify-between rounded-lg px-2 py-1 text-sm transition-colors hover:bg-sass-50 active:bg-sass-100"
+                    >
+                      <span className="text-slate-600">{formatRangeOrario(ev.ora_inizio, ev.ora_fine)}</span>
+                      <span className="flex items-center gap-2">
+                        <span
+                          className={`font-mono text-xs font-semibold ${
+                            ev.capienza_max ? semaforoClass(soloStats.persone / ev.capienza_max) : 'text-slate-500'
+                          }`}
+                        >
+                          {soloStats.persone}
+                          {ev.capienza_max ? `/${ev.capienza_max}` : ''}
+                        </span>
+                        {soloStats.personeCheckin > 0 && (
+                          <span className="text-[10px] text-slate-400">✓{soloStats.personeCheckin}</span>
+                        )}
+                        <span aria-hidden className="text-slate-300">›</span>
                       </span>
-                      {soloStats.personeCheckin > 0 && (
-                        <span className="text-[10px] text-slate-400">✓{soloStats.personeCheckin}</span>
-                      )}
-                    </span>
+                    </Link>
                   </div>
                 )}
               </div>
