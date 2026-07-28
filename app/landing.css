@@ -583,25 +583,31 @@ button { font: inherit; }
   font-size: 13.5px;
   color: var(--ink-2);
 }
-.provenienza__grid {
+.provenienza__card {
   display: grid;
   grid-template-columns: minmax(220px, 320px) 1fr;
   gap: clamp(16px, 3vw, 28px);
   align-items: stretch;
-}
-@media (max-width: 720px) {
-  .provenienza__grid { grid-template-columns: 1fr; }
-}
-
-.provenienza-list {
-  margin: 0;
-  padding: 6px clamp(16px, 2.4vw, 22px);
-  list-style: none;
-  counter-reset: provenienza;
+  padding: clamp(18px, 2.6vw, 26px);
   border-radius: var(--radius-card);
   background: var(--surface);
   border: 1px solid var(--surface-border);
   box-shadow: var(--shadow-card);
+}
+@media (max-width: 720px) {
+  .provenienza__card { grid-template-columns: 1fr; }
+}
+
+.provenienza-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: provenienza;
+  border-right: 1px solid var(--surface-border);
+  padding-right: clamp(16px, 2.4vw, 22px);
+}
+@media (max-width: 720px) {
+  .provenienza-list { border-right: none; border-bottom: 1px solid var(--surface-border); padding-right: 0; padding-bottom: 8px; }
 }
 .provenienza-list li {
   counter-increment: provenienza;
@@ -627,6 +633,12 @@ button { font: inherit; }
   font-weight: 700;
   color: var(--ink-3);
 }
+.provenienza-list__sigla {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 11.5px;
+  color: var(--ink-3);
+}
 .provenienza-list__persone {
   flex: 0 0 auto;
   font-family: var(--font-mono);
@@ -640,13 +652,9 @@ button { font: inherit; }
 .provenienza-map {
   position: relative;
   width: 100%;
-  max-width: 420px;
-  aspect-ratio: 360 / 460;
+  max-width: 380px;
+  aspect-ratio: 360 / 366;
   margin: 0 auto;
-  border-radius: var(--radius-card);
-  background: var(--surface);
-  border: 1px solid var(--surface-border);
-  box-shadow: var(--shadow-card);
   overflow: hidden;
 }
 .provenienza-map__outline {

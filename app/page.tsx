@@ -6,7 +6,8 @@ import LandingInteractions from './LandingInteractions'
 import { LANDING_HTML } from './landing-html'
 import { edizioniDisponibili, risolviEdizione } from '@/lib/types'
 import { lookupCap } from '@/lib/cap-geo'
-import { ITALY_VIEWBOX_W, ITALY_VIEWBOX_H, ITALY_PATH_D, clusterizzaProvenienza, type ProvenienzaCluster } from '@/lib/italy-map'
+import { MARCHE_VIEWBOX_W, MARCHE_VIEWBOX_H, MARCHE_PATH_D, projectLonLatMarche, isInMarcheView } from '@/lib/marche-map'
+import { clusterizzaPunti, type ClusterProvenienza } from '@/lib/geo-cluster'
 
 // Rivalida la home (e quindi la griglia orari) ogni 5 minuti.
 export const revalidate = 300
@@ -149,12 +150,12 @@ function buildOrariGrid(eventi: EventoLite[], turniByEvento: Map<string, TurnoLi
 const GALLERY_DIR = path.join(process.cwd(), 'public', 'galleria')
 const GALLERY_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp'])
 
-export type ProvenienzaRiga = { nome: string; persone: number }
+export type ProvenienzaRiga = { nome: string; sigla: string; persone: number }
 export type ProvenienzaReport = {
   top: ProvenienzaRiga[]
   altreCitta: number
   altrePersone: number
-  cluster: ProvenienzaCluster[]
+  cluster: ClusterProvenienza[]
 }
 
 function escapeHtml(s: string): string {
@@ -220,7 +221,7 @@ function buildEdizioneHtml(
 function buildProvenienzaHtml(p: ProvenienzaReport): string {
   const righeLista = p.top
     .map(
-      r => `<li><span class="provenienza-list__citta">${escapeHtml(r.nome)}</span><span class="provenienza-list__persone">${r.persone}</span></li>`
+      r => `<li><span class="provenienza-list__citta">${escapeHtml(r.nome)} <span class="provenienza-list__sigla">(${escapeHtml(r.sigla)})</span></span><span class="provenienza-list__persone">${r.persone}</span></li>`
     )
     .join('')
   const altraRiga =
@@ -234,8 +235,8 @@ function buildProvenienzaHtml(p: ProvenienzaReport): string {
   const dotsHtml = p.cluster
     .map(c => {
       const r = minR + (maxR - minR) * Math.sqrt(c.persone / maxPersone)
-      const leftPct = (c.x / ITALY_VIEWBOX_W) * 100
-      const topPct = (c.y / ITALY_VIEWBOX_H) * 100
+      const leftPct = (c.x / MARCHE_VIEWBOX_W) * 100
+      const topPct = (c.y / MARCHE_VIEWBOX_H) * 100
       const label =
         c.citta.length === 1
           ? `${escapeHtml(c.citta[0].nome)} — ${c.citta[0].persone} persone`
@@ -249,13 +250,13 @@ function buildProvenienzaHtml(p: ProvenienzaReport): string {
   return `<div class="provenienza" data-reveal>
       <div class="provenienza__head">
         <div class="eyebrow">Da dove arrivano i partecipanti</div>
-        <p>In base al CAP indicato in fase di prenotazione.</p>
+        <p>In base al CAP indicato in fase di prenotazione. Mappa delle Marche, dove arriva la stragrande maggioranza dei partecipanti.</p>
       </div>
-      <div class="provenienza__grid">
+      <div class="provenienza__card">
         <ol class="provenienza-list">${righeLista}${altraRiga}</ol>
         <div class="provenienza-map">
-          <svg class="provenienza-map__outline" viewBox="0 0 ${ITALY_VIEWBOX_W} ${ITALY_VIEWBOX_H}" aria-hidden="true">
-            <path d="${ITALY_PATH_D}" />
+          <svg class="provenienza-map__outline" viewBox="0 0 ${MARCHE_VIEWBOX_W} ${MARCHE_VIEWBOX_H}" aria-hidden="true">
+            <path d="${MARCHE_PATH_D}" />
           </svg>
           ${dotsHtml}
         </div>
@@ -308,29 +309,34 @@ export default async function Home() {
         const righe = pren ?? []
         personeIscritte = righe.reduce((acc, p) => acc + (p.n_persone ?? 0), 0)
 
-        const personePerCitta = new Map<string, { persone: number; lat: number; lon: number }>()
+        const personePerCitta = new Map<string, { nome: string; sigla: string; persone: number; lat: number; lon: number }>()
         for (const r of righe) {
           if (!r.cap) continue
           const geo = lookupCap(r.cap)
           if (!geo) continue
-          const cur = personePerCitta.get(geo.c) ?? { persone: 0, lat: geo.lat, lon: geo.lng }
+          const key = `${geo.c}|${geo.s}`
+          const cur = personePerCitta.get(key) ?? { nome: geo.c, sigla: geo.s, persone: 0, lat: geo.lat, lon: geo.lng }
           cur.persone += r.n_persone ?? 0
-          personePerCitta.set(geo.c, cur)
+          personePerCitta.set(key, cur)
         }
-        const cittaOrdinate = Array.from(personePerCitta.entries())
-          .map(([nome, v]) => ({ nome, ...v }))
-          .sort((a, b) => b.persone - a.persone)
+        const cittaOrdinate = Array.from(personePerCitta.values()).sort((a, b) => b.persone - a.persone)
 
         if (cittaOrdinate.length) {
-          const top = cittaOrdinate.slice(0, 10).map(c => ({ nome: c.nome, persone: c.persone }))
+          const top = cittaOrdinate.slice(0, 10).map(c => ({ nome: c.nome, sigla: c.sigla, persone: c.persone }))
           const resto = cittaOrdinate.slice(10)
+          // Sulla mappa (Marche) mostriamo solo le città che ricadono in quell'area:
+          // su scala nazionale finirebbero comunque fuori dal riquadro.
+          const puntiMarche = cittaOrdinate
+            .filter(c => isInMarcheView(c.lon, c.lat))
+            .map(c => {
+              const [x, y] = projectLonLatMarche(c.lon, c.lat)
+              return { nome: c.nome, x, y, persone: c.persone }
+            })
           provenienza = {
             top,
             altreCitta: resto.length,
             altrePersone: resto.reduce((acc, c) => acc + c.persone, 0),
-            cluster: clusterizzaProvenienza(
-              cittaOrdinate.map(c => ({ citta: c.nome, lat: c.lat, lon: c.lon, persone: c.persone }))
-            ),
+            cluster: clusterizzaPunti(puntiMarche, 16),
           }
         }
       }
