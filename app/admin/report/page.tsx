@@ -4,6 +4,7 @@ import EdizioneSwitch from '@/components/EdizioneSwitch'
 import { lookupCap } from '@/lib/cap-geo'
 import { MARCHE_VIEWBOX_W, MARCHE_VIEWBOX_H, MARCHE_PATH_D, projectLonLatMarche, isInMarcheView } from '@/lib/marche-map'
 import { clusterizzaPunti, type ClusterProvenienza } from '@/lib/geo-cluster'
+import ReportExport from '@/components/ReportExport'
 
 export const revalidate = 0
 
@@ -132,6 +133,17 @@ export default async function AdminReportPage({
             </svg>
             <span className="hidden sm:inline">Export</span> CSV
           </a>
+          <ReportExport
+            edizioneAttiva={edizioneAttiva}
+            totali={totali}
+            pctTotale={pctTotale}
+            righe={righe}
+            cittaTop={cittaTop}
+            altreCittaCount={cittaResto.length}
+            altrePersone={cittaResto.reduce((acc, c) => acc + c.persone, 0)}
+            clusterMarche={clusterMarche}
+            fuoriRegioneLabel={fuoriRegioneLabel}
+          />
         </div>
       </div>
 
