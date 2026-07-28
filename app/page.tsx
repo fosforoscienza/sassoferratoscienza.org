@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { createServerClient } from '@supabase/ssr'
+import { createAdminClient } from '@/lib/supabase/server'
 import LandingInteractions from './LandingInteractions'
 import { LANDING_HTML } from './landing-html'
 import { edizioniDisponibili, risolviEdizione } from '@/lib/types'
@@ -146,7 +147,12 @@ function buildOrariGrid(eventi: EventoLite[], turniByEvento: Map<string, TurnoLi
 const GALLERY_DIR = path.join(process.cwd(), 'public', 'galleria')
 const GALLERY_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp'])
 
-function buildGalleryHtml(): string {
+type BarraAttivita = { label: string; count: number; colore: string }
+
+// Report grafico + galleria foto dell'edizione conclusa. `barre` include i
+// laboratori (un conteggio per turno svolto) più Science Show e concerto,
+// che non sono in sass_eventi ma si sono svolti una volta ciascuno.
+function buildEdizioneHtml(barre: BarraAttivita[], attivitaSvolte: number, personeIscritte: number | null): string {
   let files: string[] = []
   try {
     files = fs
@@ -156,7 +162,18 @@ function buildGalleryHtml(): string {
   } catch {
     files = []
   }
-  if (!files.length) return ''
+
+  const maxCount = Math.max(1, ...barre.map(b => b.count))
+  const barreHtml = barre
+    .map(b => {
+      const pct = Math.max(6, Math.round((b.count / maxCount) * 100))
+      return `<div class="edizione-bar">
+          <span class="edizione-bar__label">${b.label}</span>
+          <span class="edizione-bar__track"><span class="edizione-bar__fill" style="width:${pct}%;background:${b.colore}"></span></span>
+          <span class="edizione-bar__value">${b.count}</span>
+        </div>`
+    })
+    .join('')
 
   const items = files
     .map((f, i) => {
@@ -167,23 +184,42 @@ function buildGalleryHtml(): string {
     })
     .join('')
 
-  return `<section id="galleria" class="section gallery">
+  return `<section id="edizione" class="section edizione">
       <div class="container">
         <div class="section-head" data-reveal>
-          <div class="eyebrow">Un ricordo della giornata</div>
-          <h2>La galleria fotografica</h2>
-          <p>Gli scatti più belli del 24 luglio 2026, tra laboratori, spettacolo e musica in piazza.</p>
+          <div class="eyebrow">L'edizione conclusa</div>
+          <h2>Edizione 2026</h2>
+          <p>Un venerdì di laboratori, spettacolo e musica in piazza: i numeri e gli scatti di questa edizione.</p>
         </div>
-        <div class="gallery__grid">${items}</div>
+
+        <div class="edizione-stats" data-reveal>
+          <div class="edizione-stat">
+            <span class="edizione-stat__value">${attivitaSvolte}</span>
+            <span class="edizione-stat__label">Attività svolte</span>
+          </div>
+          ${personeIscritte !== null
+            ? `<div class="edizione-stat">
+            <span class="edizione-stat__value">${personeIscritte}</span>
+            <span class="edizione-stat__label">Persone iscritte</span>
+          </div>`
+            : ''}
+        </div>
+
+        <div class="edizione-chart" data-reveal>${barreHtml}</div>
+
+        ${items ? `<div class="gallery__grid">${items}</div>` : ''}
       </div>
     </section>`
 }
 
 export default async function Home() {
   let gridHtml = ''
+  let edizioneHtml = ''
   // Mappa numero laboratorio → id evento, per far puntare i pulsanti "Prenota"
   // delle card direttamente alla prenotazione del singolo laboratorio.
   const idByNumero = new Map<number, string>()
+  let eventi: EventoLite[] = []
+  const turniByEvento = new Map<string, TurnoLite[]>()
   try {
     const supabase = publicClient()
     const [{ data: eventiTutti }, { data: turni }] = await Promise.all([
@@ -193,8 +229,7 @@ export default async function Home() {
     // Solo l'edizione più recente: le edizioni passate restano nel database
     // per lo storico ma non devono comparire sulla home pubblica.
     const edizioneCorrente = risolviEdizione(edizioniDisponibili((eventiTutti ?? []) as EventoLite[]))
-    const eventi = ((eventiTutti ?? []) as EventoLite[]).filter(e => e.edizione === edizioneCorrente)
-    const turniByEvento = new Map<string, TurnoLite[]>()
+    eventi = ((eventiTutti ?? []) as EventoLite[]).filter(e => e.edizione === edizioneCorrente)
     for (const t of turni ?? []) {
       const hhmm = String(t.ora_inizio).slice(0, 5)
       const arr = turniByEvento.get(t.evento_id) ?? []
@@ -207,11 +242,40 @@ export default async function Home() {
     console.error('[home] griglia orari non generata:', err)
   }
 
+  if (eventi.length) {
+    try {
+      // Persone iscritte (prenotate, non scansionate): conteggio aggregato,
+      // non dati personali. sass_prenotazioni è leggibile solo dagli admin,
+      // quindi serve la service role — come già per la disponibilità in /prenota.
+      let personeIscritte: number | null = null
+      if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        const admin = createAdminClient()
+        const eventoIds = eventi.map(e => e.id)
+        const { data: pren } = await admin.from('sass_prenotazioni').select('n_persone').in('evento_id', eventoIds)
+        personeIscritte = (pren ?? []).reduce((acc, p) => acc + (p.n_persone ?? 0), 0)
+      }
+
+      const barre: BarraAttivita[] = eventi.map(e => ({
+        label: e.titolo,
+        count: e.a_turni ? turniByEvento.get(e.id)?.length ?? 0 : 1,
+        colore: e.colore,
+      }))
+      // Science Show e concerto: a ingresso libero, non in sass_eventi, un'unica replica ciascuno.
+      barre.push({ label: 'Science Show', count: 1, colore: '#f08c2e' })
+      barre.push({ label: 'Concerto "Ancora Tu"', count: 1, colore: '#f3c52e' })
+
+      const attivitaSvolte = barre.reduce((acc, b) => acc + b.count, 0)
+      edizioneHtml = buildEdizioneHtml(barre, attivitaSvolte, personeIscritte)
+    } catch (err) {
+      console.error('[home] report edizione non generato:', err)
+    }
+  }
+
   // Sostituisci i token __LABn__ con l'id reale del laboratorio.
   // Fallback a /prenota (elenco) se l'evento non è stato caricato.
   const html = LANDING_HTML
     .replace('<!--ORARI_GRID-->', gridHtml)
-    .replace('<!--GALLERIA-->', buildGalleryHtml())
+    .replace('<!--EDIZIONE-->', edizioneHtml)
     .replace(/\/prenota\/__LAB(\d+)__/g, (_, n: string) => {
       const id = idByNumero.get(Number(n))
       return id ? `/prenota/${id}` : '/prenota'

@@ -14,6 +14,10 @@ export const LANDING_HTML = `
           <a href="#arrivare">Come arrivare</a>
           <a href="#info">Info</a>
         </nav>
+        <a href="/admin" class="site-header__admin" aria-label="Area riservata organizzatori">
+          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8.5V6.5a5 5 0 0 1 10 0v2M4.5 8.5h11a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Admin
+        </a>
       </div>
     </header>
 
@@ -81,7 +85,7 @@ export const LANDING_HTML = `
       </div>
     </section>
 
-    <!--GALLERIA-->
+    <!--EDIZIONE-->
 
     <!-- ===================== PROGRAMMA / LABORATORI ===================== -->
     <section id="programma" class="section">
