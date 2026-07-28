@@ -1,3 +1,5 @@
+import fs from 'node:fs'
+import path from 'node:path'
 import { createServerClient } from '@supabase/ssr'
 import LandingInteractions from './LandingInteractions'
 import { LANDING_HTML } from './landing-html'
@@ -58,10 +60,10 @@ const JSONLD = [
       },
       {
         '@type': 'Question',
-        name: 'Devo prenotare i laboratori?',
+        name: 'Bisognava prenotare i laboratori?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Sì, è possibile prenotare i laboratori su sassoferratoscienza.org. I posti sono limitati: ti consigliamo di prenotare in anticipo. Lo Science Show e il concerto sono a ingresso libero senza prenotazione.',
+          text: "L'evento si è svolto il 24 luglio 2026 e si è ormai concluso: le prenotazioni non sono più disponibili. Durante la manifestazione i laboratori erano gratuiti e a posti limitati, prenotabili in anticipo; lo Science Show e il concerto erano invece a ingresso libero senza prenotazione.",
         },
       },
       {
@@ -121,16 +123,16 @@ function buildOrariGrid(eventi: EventoLite[], turniByEvento: Map<string, TurnoLi
         .map(t => {
           const tid = byTime.get(t)
           return tid
-            ? `<td><a class="orari-dot" href="/prenota/${e.id}?turno=${tid}" style="background:${e.colore}" aria-label="${e.titolo} — prenota il turno delle ${t}"></a></td>`
+            ? `<td><span class="orari-dot" style="background:${e.colore}" aria-label="${e.titolo} — ${t}"></span></td>`
             : `<td><span class="orari-dot orari-dot--empty" aria-hidden="true"></span></td>`
         })
         .join('')
-      return `<tr style="--c:${e.colore}"><th scope="row"><a class="orari-lab" href="/prenota/${e.id}">${e.titolo}</a></th>${cells}</tr>`
+      return `<tr style="--c:${e.colore}"><th scope="row"><span class="orari-lab">${e.titolo}</span></th>${cells}</tr>`
     })
     .join('')
 
   return `<div class="orari" data-reveal>
-      <div class="orari__title">Gli orari · venerdì 24 luglio<span class="orari__title-note"> • Tutte le attività sono gratuite, alcune a prenotazione obbligatoria. Prenotate il posto solo per bambini.</span></div>
+      <div class="orari__title">Gli orari · venerdì 24 luglio<span class="orari__title-note"> • Tutte le attività sono state gratuite.</span></div>
       <div class="orari__scroll">
         <table class="orari-table">
           <thead><tr><th scope="col">Laboratorio</th>${head}</tr></thead>
@@ -138,6 +140,42 @@ function buildOrariGrid(eventi: EventoLite[], turniByEvento: Map<string, TurnoLi
         </table>
       </div>
     </div>`
+}
+
+const GALLERY_DIR = path.join(process.cwd(), 'public', 'galleria')
+const GALLERY_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp'])
+
+function buildGalleryHtml(): string {
+  let files: string[] = []
+  try {
+    files = fs
+      .readdirSync(GALLERY_DIR)
+      .filter(f => GALLERY_EXT.has(path.extname(f).toLowerCase()))
+      .sort((a, b) => a.localeCompare(b, 'it'))
+  } catch {
+    files = []
+  }
+  if (!files.length) return ''
+
+  const items = files
+    .map((f, i) => {
+      const src = `/galleria/${encodeURIComponent(f)}`
+      return `<a class="gallery__item" href="${src}" data-lightbox-trigger data-reveal data-reveal-delay="${(i % 6) * 60}">
+            <img src="${src}" alt="Foto della festa della scienza a Sassoferrato" loading="lazy">
+          </a>`
+    })
+    .join('')
+
+  return `<section id="galleria" class="section gallery">
+      <div class="container">
+        <div class="section-head" data-reveal>
+          <div class="eyebrow">Un ricordo della giornata</div>
+          <h2>La galleria fotografica</h2>
+          <p>Gli scatti più belli del 24 luglio 2026, tra laboratori, spettacolo e musica in piazza.</p>
+        </div>
+        <div class="gallery__grid">${items}</div>
+      </div>
+    </section>`
 }
 
 export default async function Home() {
@@ -168,6 +206,7 @@ export default async function Home() {
   // Fallback a /prenota (elenco) se l'evento non è stato caricato.
   const html = LANDING_HTML
     .replace('<!--ORARI_GRID-->', gridHtml)
+    .replace('<!--GALLERIA-->', buildGalleryHtml())
     .replace(/\/prenota\/__LAB(\d+)__/g, (_, n: string) => {
       const id = idByNumero.get(Number(n))
       return id ? `/prenota/${id}` : '/prenota'

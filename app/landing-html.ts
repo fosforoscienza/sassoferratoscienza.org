@@ -14,7 +14,6 @@ export const LANDING_HTML = `
           <a href="#arrivare">Come arrivare</a>
           <a href="#info">Info</a>
         </nav>
-        <a href="/prenota" class="btn-book">Prenota</a>
       </div>
     </header>
 
@@ -38,7 +37,6 @@ export const LANDING_HTML = `
           </div>
           <div class="hero__cta">
             <a href="#programma" class="btn btn--primary">Esplora il programma →</a>
-            <a href="/prenota" class="btn btn--ghost">Prenota un laboratorio</a>
           </div>
         </div>
 
@@ -83,13 +81,15 @@ export const LANDING_HTML = `
       </div>
     </section>
 
+    <!--GALLERIA-->
+
     <!-- ===================== PROGRAMMA / LABORATORI ===================== -->
     <section id="programma" class="section">
       <div class="container">
         <div class="section-head" data-reveal>
           <div class="eyebrow">I laboratori</div>
           <h2 id="laboratori">Mettiti alla prova,<br>esperimento dopo esperimento</h2>
-          <p>Cinque laboratori per scoprire la fisica, la matematica, l'astronomia, la natura e i sensi. Ogni pallino indica una replica da cliccare per prenotare il turno.</p>
+          <p>Cinque laboratori per scoprire la fisica, la matematica, l'astronomia, la natura e i sensi. Ogni pallino indica una replica svolta durante la giornata.</p>
         </div>
 
         <!--ORARI_GRID-->
@@ -105,7 +105,6 @@ export const LANDING_HTML = `
               <span class="tag tag--age">ETÀ 8+</span>
             </div>
             <p class="lab-card__desc">Usa materiali di uso quotidiano per costruire "qualcosa" da far scivolare su una rampa di legno. L'obiettivo? Arrivare per ultimi al traguardo! Riuscirai a sfruttare la fisica per rallentare?</p>
-            <a href="/prenota/__LAB1__" class="lab-card__link">Prenota →</a>
           </article>
 
           <article class="lab-card lab-card--green" data-reveal data-reveal-delay="70">
@@ -130,7 +129,6 @@ export const LANDING_HTML = `
               <span class="tag tag--age">ETÀ 8+</span>
             </div>
             <p class="lab-card__desc">Portati a casa una notte stellata. Esploriamo le maggiori costellazioni del nostro cielo e i miti che le animano. Costruiamo insieme un astrolabio per orientarci nella volta celeste.</p>
-            <a href="/prenota/__LAB3__" class="lab-card__link">Prenota →</a>
           </article>
 
           <article class="lab-card lab-card--teal" data-reveal>
@@ -143,7 +141,6 @@ export const LANDING_HTML = `
               <span class="tag tag--age">ETÀ 8+</span>
             </div>
             <p class="lab-card__desc">All'interno del progetto "Tra borghi e natura", grazie ai visori di realtà virtuale immersivi a 360°, vivrai un video emozionale girato nei luoghi naturalistici più affascinanti delle Marche.</p>
-            <a href="/prenota/__LAB4__" class="lab-card__link">Prenota →</a>
           </article>
 
           <article class="lab-card lab-card--pink" data-reveal data-reveal-delay="70">
@@ -155,14 +152,6 @@ export const LANDING_HTML = `
               <span class="tag tag--age">ETÀ 8+</span>
             </div>
             <p class="lab-card__desc">Scopriamo come funzionano occhi e cervello! Tra giochi, esperimenti e illusioni ottiche, seguiamo il viaggio della luce che entra nei nostri occhi e diventa le immagini che vediamo ogni giorno.</p>
-            <a href="/prenota/__LAB5__" class="lab-card__link">Prenota →</a>
-          </article>
-
-          <article class="lab-card lab-card--cta" data-reveal data-reveal-delay="140">
-            <div class="lab-card__kicker">Posti limitati</div>
-            <h3>Prenota il tuo laboratorio</h3>
-            <p>I laboratori sono gratuiti ma a numero chiuso. Assicurati il posto prenotando online.</p>
-            <a href="/prenota" class="btn-cta">Prenota ora →</a>
           </article>
 
         </div>
@@ -297,8 +286,8 @@ export const LANDING_HTML = `
           </div>
 
           <div class="faq-item" data-faq>
-            <button class="faq-q" type="button" data-faq-q>Devo prenotare i laboratori?<span class="faq-icon" data-faq-ic aria-hidden="true">+</span></button>
-            <div class="faq-a" data-faq-a>Sì, è possibile prenotare i laboratori su <strong>sassoferratoscienza.org</strong>. I posti sono limitati: ti consigliamo di prenotare in anticipo. Lo Science Show e il concerto sono invece a ingresso libero senza prenotazione.</div>
+            <button class="faq-q" type="button" data-faq-q>Bisognava prenotare i laboratori?<span class="faq-icon" data-faq-ic aria-hidden="true">+</span></button>
+            <div class="faq-a" data-faq-a>L'evento si è svolto il 24 luglio 2026 e si è ormai concluso: le prenotazioni non sono più disponibili. Durante la manifestazione i laboratori erano gratuiti e a posti limitati, prenotabili in anticipo; lo Science Show e il concerto erano invece a ingresso libero senza prenotazione.</div>
           </div>
 
           <div class="faq-item" data-faq>
@@ -316,21 +305,6 @@ export const LANDING_HTML = `
             <div class="faq-a" data-faq-a>In Piazza Bartolo e lungo Corso Cavour, nel cuore del centro storico di Sassoferrato (AN), uno dei Borghi più belli d'Italia.</div>
           </div>
 
-        </div>
-      </div>
-    </section>
-
-    <!-- ===================== PRENOTA — CTA ===================== -->
-    <section id="prenota" class="book-band">
-      <div class="container">
-        <div class="book-card" data-reveal>
-          <div class="book-card__bg" aria-hidden="true"><img src="assets/spiral.png" alt=""></div>
-          <div class="book-card__inner">
-            <div class="book-card__kicker">Ti aspettiamo il 24 luglio</div>
-            <h2>Prenota il tuo posto<br>alla festa della scienza</h2>
-            <p>I laboratori sono gratuiti ma a posti limitati. Prenota online e vivi una giornata di scoperte tra le piazze di Sassoferrato.</p>
-            <a href="/prenota" class="btn-cta">Prenota un laboratorio →</a>
-          </div>
         </div>
       </div>
     </section>
@@ -375,11 +349,6 @@ export const LANDING_HTML = `
             <div class="footer__h">Quando &amp; dove</div>
             <div class="footer__where">Venerdì 24 luglio 2026<br>Dalle 17:00 alle 22:00<br>Piazza Bartolo e Corso Cavour<br>Sassoferrato (AN)<br><strong>Ingresso libero</strong></div>
           </div>
-          <div>
-            <div class="footer__h">Prenotazioni</div>
-            <p class="footer__note">Prenota i laboratori online.</p>
-            <a href="/prenota" class="footer__book">Prenota →</a>
-          </div>
         </div>
         <div class="footer-bottom">
           <div class="footer-bottom__copy">© 2026 Sassoferrato Scienza · Fosforo — la festa della scienza</div>
@@ -387,4 +356,10 @@ export const LANDING_HTML = `
         </div>
       </div>
     </footer>
+
+    <!-- ===================== LIGHTBOX GALLERIA ===================== -->
+    <div class="lightbox" data-lightbox aria-hidden="true">
+      <button class="lightbox__close" type="button" data-lightbox-close aria-label="Chiudi">✕</button>
+      <img class="lightbox__img" data-lightbox-img src="" alt="">
+    </div>
 `

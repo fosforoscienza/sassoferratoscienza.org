@@ -98,8 +98,6 @@ button { font: inherit; }
 }
 /* Titoli su fondi scuri o colorati: mantengono il loro colore leggibile */
 .finale h2 { color: #f3ece0; }
-.lab-card--cta h3 { color: #fff; }
-.book-card h2 { color: #fff; }
 
 /* Wordmark testuale (sostituisce il logo Fosforo) */
 .brand-text {
@@ -311,27 +309,6 @@ button { font: inherit; }
   color: var(--ink);
 }
 
-.btn-book {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 10px 18px;
-  border-radius: var(--radius-pill);
-  background: var(--accent);
-  color: #fff;
-  font-weight: 800;
-  font-size: 13.5px;
-  text-decoration: none;
-  cursor: pointer;
-  box-shadow: 0 6px 16px rgba(15, 155, 216, .32);
-  transition: transform .25s var(--ease), box-shadow .25s var(--ease);
-}
-.btn-book:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 9px 22px rgba(15, 155, 216, .42);
-}
-
 /* =========================================================================
    Hero
    ========================================================================= */
@@ -535,6 +512,74 @@ button { font: inherit; }
 }
 
 /* =========================================================================
+   Galleria foto dell'evento
+   ========================================================================= */
+.gallery__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+.gallery__item {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  cursor: zoom-in;
+  transition: transform .3s var(--ease), box-shadow .3s var(--ease);
+}
+.gallery__item:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card-hover);
+}
+.gallery__item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .4s var(--ease);
+}
+.gallery__item:hover img { transform: scale(1.05); }
+
+/* Lightbox: apertura foto a schermo intero */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(20px, 5vw, 56px);
+  background: rgba(15, 12, 20, .88);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s var(--ease);
+}
+.lightbox.is-open { opacity: 1; pointer-events: auto; }
+.lightbox__img {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 12px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, .5);
+}
+.lightbox__close {
+  position: absolute;
+  top: clamp(14px, 3vw, 28px);
+  right: clamp(14px, 3vw, 28px);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, .12);
+  color: #fff;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background .2s ease;
+}
+.lightbox__close:hover { background: rgba(255, 255, 255, .22); }
+
+/* =========================================================================
    Programma / laboratori
    ========================================================================= */
 .section-head { max-width: 660px; margin-bottom: clamp(32px, 4vw, 52px); }
@@ -646,37 +691,7 @@ button { font: inherit; }
   color: var(--ink-2);
   margin: 0 0 22px;
 }
-.landing-root a.lab-card__link {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  /* Allineati in basso, alla stessa altezza in tutte le card della riga */
-  margin-top: auto;
-  align-self: flex-start;
-  padding: 12px 22px;
-  border-radius: 14px;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: .05em;
-  text-transform: uppercase;
-  color: #fff;
-  text-decoration: none;
-  border: none;
-  /* Pulsante pieno nel colore del laboratorio (fallback: tonalità testo) */
-  background: var(--c-text);
-  background: linear-gradient(135deg, var(--c-text), var(--c-chip-text));
-  box-shadow: 0 8px 18px -6px rgba(0, 0, 0, .3);
-  box-shadow: 0 9px 20px -6px color-mix(in srgb, var(--c) 65%, transparent);
-  cursor: pointer;
-  transition: transform .2s var(--ease), box-shadow .2s;
-}
-.landing-root a.lab-card__link:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 13px 26px -6px color-mix(in srgb, var(--c) 75%, transparent);
-}
-
-/* Badge "a fruizione libera" (sostituisce il pulsante Prenota) — allineato in basso */
+/* Badge "a fruizione libera" — allineato in basso */
 .lab-card__libera {
   margin-top: auto;
   align-self: flex-start;
@@ -720,58 +735,6 @@ button { font: inherit; }
 .lab-card--indigo { --c: var(--indigo); --c-text: #574bb0; --c-chip-bg: rgba(106,92,199,.15); --c-chip-text: #534aa3; }
 .lab-card--teal   { --c: var(--teal);   --c-text: #0f8f7c; --c-chip-bg: rgba(22,179,154,.16); --c-chip-text: #0c8473; }
 .lab-card--pink   { --c: var(--pink);   --c-text: #cc4587; --c-chip-bg: rgba(232,90,160,.15); --c-chip-text: #bf3f7d; }
-
-/* Card invito alla prenotazione */
-.lab-card--cta {
-  background: linear-gradient(150deg, #0f9bd8, #16b39a);
-  border: none;
-  color: #fff;
-  box-shadow: 0 12px 30px rgba(15, 155, 216, .28);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 30px 26px;
-}
-.lab-card--cta:hover { transform: translateY(-6px); box-shadow: 0 18px 44px rgba(15, 155, 216, .36); border-color: transparent; }
-.lab-card--cta::before { display: none; }
-.lab-card--cta .lab-card__kicker {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: .13em;
-  text-transform: uppercase;
-  opacity: .9;
-  margin-bottom: 12px;
-}
-.lab-card--cta h3 {
-  font-size: 25px;
-  font-weight: 900;
-  letter-spacing: -.01em;
-  margin: 0 0 12px;
-  line-height: 1.08;
-}
-.lab-card--cta p {
-  font-size: 15px;
-  line-height: 1.55;
-  margin: 0 0 22px;
-  opacity: .95;
-}
-.lab-card--cta .btn-cta {
-  align-self: flex-start;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 13px 22px;
-  border-radius: var(--radius-pill);
-  background: #fff;
-  color: var(--accent-deep);
-  font-weight: 800;
-  font-size: 14.5px;
-  text-decoration: none;
-  cursor: pointer;
-  transition: transform .25s var(--ease);
-}
-.lab-card--cta .btn-cta:hover { transform: translateY(-2px); }
 
 /* =========================================================================
    Science Show
@@ -1167,74 +1130,6 @@ button { font: inherit; }
 .faq-a strong { color: var(--ink); }
 
 /* =========================================================================
-   Prenota — banda CTA
-   ========================================================================= */
-.book-band { scroll-margin-top: 80px; padding: clamp(20px, 3vw, 40px) 0 clamp(48px, 6vw, 90px); }
-.book-card {
-  position: relative;
-  overflow: hidden;
-  border-radius: var(--radius-panel);
-  background: linear-gradient(125deg, #0f9bd8, #6a5cc7 60%, #e85aa0);
-  color: #fff;
-  padding: clamp(40px, 6vw, 76px) clamp(28px, 5vw, 68px);
-  text-align: center;
-  box-shadow: 0 20px 50px rgba(106, 92, 199, .3);
-}
-.book-card__bg {
-  position: absolute;
-  top: -30%;
-  left: -5%;
-  width: 340px;
-  opacity: .18;
-  pointer-events: none;
-}
-.book-card__bg img { width: 100%; animation: festaSpin 70s linear infinite; }
-.book-card__inner { position: relative; }
-.book-card__kicker {
-  font-family: var(--font-mono);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-  opacity: .9;
-  margin-bottom: 18px;
-}
-.book-card h2 {
-  font-size: clamp(30px, 4.6vw, 56px);
-  line-height: 1.02;
-  letter-spacing: -.025em;
-  font-weight: 900;
-  margin: 0 0 18px;
-  text-wrap: balance;
-}
-.book-card p {
-  font-size: clamp(16px, 1.6vw, 19px);
-  line-height: 1.55;
-  margin: 0 auto 30px;
-  max-width: 50ch;
-  opacity: .95;
-}
-.book-card .btn-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  padding: 15px 26px;
-  border-radius: 14px;
-  background: #fff;
-  color: #6a4fbf;
-  font-weight: 800;
-  font-size: 15px;
-  text-decoration: none;
-  cursor: pointer;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, .18);
-  transition: transform .25s var(--ease), box-shadow .25s var(--ease);
-}
-.book-card .btn-cta:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 16px 38px rgba(0, 0, 0, .3);
-}
-
-/* =========================================================================
    Partner / sponsor
    ========================================================================= */
 .partners {
@@ -1322,22 +1217,6 @@ button { font: inherit; }
 .footer__links a:hover { color: #fff; }
 .footer__where { font-size: 14.5px; line-height: 1.7; color: #9890a4; }
 .footer__where strong { color: #7ec8ec; font-weight: 700; }
-.footer__note { font-size: 14.5px; line-height: 1.6; color: #9890a4; margin: 0 0 16px; }
-.footer__book {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
-  border-radius: var(--radius-pill);
-  background: var(--accent);
-  color: #fff;
-  font-weight: 800;
-  font-size: 13.5px;
-  text-decoration: none;
-  cursor: pointer;
-  transition: transform .25s var(--ease);
-}
-.footer__book:hover { transform: translateY(-2px); }
 .footer-bottom {
   border-top: 1px solid rgba(255, 255, 255, .1);
   padding-top: 24px;
@@ -1438,13 +1317,6 @@ button { font: inherit; }
 }
 .orari-lab {
   color: inherit;
-  text-decoration: none;
-  transition: color .15s ease;
-}
-.orari-lab:hover {
-  color: var(--c);
-  text-decoration: underline;
-  text-underline-offset: 3px;
 }
 .orari-dot {
   display: inline-block;
@@ -1452,16 +1324,13 @@ button { font: inherit; }
   width: 18px;
   height: 18px;
   border-radius: 50%;
-}
-a.orari-dot {
   box-shadow: 0 2px 7px rgba(0, 0, 0, .18);
-  transition: transform .15s ease;
 }
-a.orari-dot:hover { transform: scale(1.28); }
 .orari-dot--empty {
   width: 7px;
   height: 7px;
   background: rgba(0, 0, 0, .1);
+  box-shadow: none;
 }
 .orari__note {
   margin-top: 12px;
@@ -1490,8 +1359,7 @@ a.orari-dot:hover { transform: scale(1.28); }
   .portrait,
   .marquee__track,
   .show-panel__art img,
-  .finale__bg img,
-  .book-card__bg img {
+  .finale__bg img {
     animation: none !important;
   }
   .landing-root [data-reveal] {

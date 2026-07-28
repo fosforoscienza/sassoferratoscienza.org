@@ -77,10 +77,50 @@ export default function LandingInteractions() {
       }
     })
 
+    // ----- Lightbox galleria foto -----
+    const lightbox = root.querySelector('[data-lightbox]') as HTMLElement | null
+    const lightboxImg = root.querySelector('[data-lightbox-img]') as HTMLImageElement | null
+    const lightboxClose = root.querySelector('[data-lightbox-close]') as HTMLElement | null
+    const triggers = Array.prototype.slice.call(
+      root.querySelectorAll('[data-lightbox-trigger]')
+    ) as HTMLAnchorElement[]
+
+    const openLightbox = (href: string, alt: string) => {
+      if (!lightbox || !lightboxImg) return
+      lightboxImg.src = href
+      lightboxImg.alt = alt
+      lightbox.classList.add('is-open')
+      lightbox.setAttribute('aria-hidden', 'false')
+      document.body.style.overflow = 'hidden'
+    }
+    const closeLightbox = () => {
+      if (!lightbox) return
+      lightbox.classList.remove('is-open')
+      lightbox.setAttribute('aria-hidden', 'true')
+      document.body.style.overflow = ''
+    }
+    const onTriggerClick = (e: Event) => {
+      e.preventDefault()
+      const a = e.currentTarget as HTMLAnchorElement
+      const img = a.querySelector('img')
+      openLightbox(a.href, img?.alt ?? '')
+    }
+    const onKeydown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeLightbox()
+    }
+    triggers.forEach(a => a.addEventListener('click', onTriggerClick))
+    lightboxClose?.addEventListener('click', closeLightbox)
+    lightbox?.addEventListener('click', e => {
+      if (e.target === lightbox) closeLightbox()
+    })
+    document.addEventListener('keydown', onKeydown)
+
     return () => {
       io?.disconnect()
       if (fallback) clearTimeout(fallback)
       faqHandlers.forEach(({ btn, fn }) => btn.removeEventListener('click', fn))
+      triggers.forEach(a => a.removeEventListener('click', onTriggerClick))
+      document.removeEventListener('keydown', onKeydown)
     }
   }, [])
 
