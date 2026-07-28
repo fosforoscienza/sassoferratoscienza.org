@@ -48,6 +48,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               <Link href="/admin/scan" className="text-sm text-slate-600 hover:text-sass-700">Scan</Link>
               <Link href="/admin/prenotazioni" className="text-sm text-slate-600 hover:text-sass-700">Prenotazioni</Link>
               <Link href="/admin/attivita" className="text-sm text-slate-600 hover:text-sass-700">Per attività</Link>
+              <Link href="/admin/report" className="text-sm text-slate-600 hover:text-sass-700">Report</Link>
             </div>
           </div>
           <div className="flex items-center gap-3 text-xs text-slate-500">
@@ -64,6 +65,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <Link href="/admin/scan" className="whitespace-nowrap text-sm text-slate-700">Scan</Link>
           <Link href="/admin/prenotazioni" className="whitespace-nowrap text-sm text-slate-700">Prenotazioni</Link>
           <Link href="/admin/attivita" className="whitespace-nowrap text-sm text-slate-700">Per attività</Link>
+          <Link href="/admin/report" className="whitespace-nowrap text-sm text-slate-700">Report</Link>
         </div>
       </nav>
       {children}

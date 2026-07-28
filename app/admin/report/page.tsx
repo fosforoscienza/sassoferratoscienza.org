@@ -1,0 +1,189 @@
+import { createClient } from '@/lib/supabase/server'
+
+export const revalidate = 0
+
+type StatoLab = {
+  prenotazioni: number
+  persone: number
+  scansioni: number
+  personeScansionate: number
+}
+
+function statoVuoto(): StatoLab {
+  return { prenotazioni: 0, persone: 0, scansioni: 0, personeScansionate: 0 }
+}
+
+function pctClass(pct: number) {
+  if (pct >= 75) return 'text-emerald-600'
+  if (pct >= 40) return 'text-amber-600'
+  return 'text-slate-500'
+}
+
+function StatCard({ label, value }: { label: string; value: number | string }) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">{label}</p>
+      <p className="mt-1 font-display text-2xl font-black text-brown">{value}</p>
+    </div>
+  )
+}
+
+export default async function AdminReportPage() {
+  const supabase = createClient()
+
+  const [{ data: eventi }, { data: prenotazioni }] = await Promise.all([
+    supabase
+      .from('sass_eventi')
+      .select('id, numero, categoria, colore, titolo')
+      .order('numero'),
+    supabase.from('sass_prenotazioni').select('evento_id, n_persone, check_in_at'),
+  ])
+
+  const statsByEvento = new Map<string, StatoLab>()
+  for (const p of prenotazioni ?? []) {
+    const cur = statsByEvento.get(p.evento_id) ?? statoVuoto()
+    cur.prenotazioni += 1
+    cur.persone += p.n_persone
+    if (p.check_in_at) {
+      cur.scansioni += 1
+      cur.personeScansionate += p.n_persone
+    }
+    statsByEvento.set(p.evento_id, cur)
+  }
+
+  const righe = (eventi ?? []).map(e => ({
+    ...e,
+    stat: statsByEvento.get(e.id) ?? statoVuoto(),
+  }))
+
+  const totali = righe.reduce((acc, r) => {
+    acc.prenotazioni += r.stat.prenotazioni
+    acc.persone += r.stat.persone
+    acc.scansioni += r.stat.scansioni
+    acc.personeScansionate += r.stat.personeScansionate
+    return acc
+  }, statoVuoto())
+
+  const pctTotale = totali.persone > 0 ? Math.round((totali.personeScansionate / totali.persone) * 100) : 0
+
+  return (
+    <main className="mx-auto max-w-6xl px-4 py-6 md:py-8">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="font-display text-2xl font-black text-brown md:text-3xl">Report evento</h1>
+          <p className="mt-1 text-xs text-slate-600 md:text-sm">
+            Prenotazioni effettuate e check-in scansionati durante la giornata, per laboratorio.
+          </p>
+        </div>
+        <a
+          href="/api/admin/report/export"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-sass-700 shadow-sm hover:border-sass-400"
+          title="Scarica CSV con i totali per laboratorio"
+        >
+          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+          </svg>
+          <span className="hidden sm:inline">Export</span> CSV
+        </a>
+      </div>
+
+      <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+        <StatCard label="Prenotazioni" value={totali.prenotazioni} />
+        <StatCard label="Persone prenotate" value={totali.persone} />
+        <StatCard label="Persone scansionate" value={totali.personeScansionate} />
+        <StatCard label="% presenze" value={`${pctTotale}%`} />
+      </div>
+
+      {/* Mobile */}
+      <ul className="-mx-4 mt-6 divide-y divide-slate-100 border-y border-slate-200 bg-white shadow-sm md:hidden">
+        {righe.length === 0 ? (
+          <li className="px-4 py-10 text-center text-slate-400">Nessun laboratorio.</li>
+        ) : (
+          righe.map(r => {
+            const pct = r.stat.persone > 0 ? Math.round((r.stat.personeScansionate / r.stat.persone) * 100) : 0
+            return (
+              <li key={r.id} className="px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <span
+                    className="inline-block rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white"
+                    style={{ backgroundColor: r.colore ?? '#0f9bd8' }}
+                  >
+                    {r.categoria}
+                  </span>
+                  <span className="font-mono text-xs text-slate-400">#{r.numero}</span>
+                </div>
+                <p className="mt-1 font-semibold text-slate-900">{r.titolo}</p>
+                <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600">
+                  <span>{r.stat.prenotazioni} prenotazion{r.stat.prenotazioni === 1 ? 'e' : 'i'} · {r.stat.persone} person{r.stat.persone === 1 ? 'a' : 'e'}</span>
+                  <span className={`font-semibold ${pctClass(pct)}`}>
+                    ✓ {r.stat.personeScansionate} scansionat{r.stat.personeScansionate === 1 ? 'a' : 'e'} ({pct}%)
+                  </span>
+                </div>
+              </li>
+            )
+          })
+        )}
+      </ul>
+
+      {/* Desktop */}
+      <div className="mt-6 hidden overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm md:block">
+        <table className="w-full text-sm">
+          <thead className="bg-slate-50">
+            <tr className="text-left text-xs uppercase tracking-wider text-slate-500">
+              <th className="px-4 py-3">Laboratorio</th>
+              <th className="px-4 py-3 text-center">Prenotazioni</th>
+              <th className="px-4 py-3 text-center">Persone prenotate</th>
+              <th className="px-4 py-3 text-center">Scansionate</th>
+              <th className="px-4 py-3 text-center">Persone scansionate</th>
+              <th className="px-4 py-3 text-center">% presenze</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {righe.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="px-4 py-10 text-center text-slate-400">Nessun laboratorio.</td>
+              </tr>
+            ) : (
+              righe.map(r => {
+                const pct = r.stat.persone > 0 ? Math.round((r.stat.personeScansionate / r.stat.persone) * 100) : 0
+                return (
+                  <tr key={r.id} className="hover:bg-slate-50">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="inline-block rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white"
+                          style={{ backgroundColor: r.colore ?? '#0f9bd8' }}
+                        >
+                          {r.categoria}
+                        </span>
+                        <span className="font-mono text-xs text-slate-400">#{r.numero}</span>
+                      </div>
+                      <p className="mt-1 font-medium text-slate-900">{r.titolo}</p>
+                    </td>
+                    <td className="px-4 py-3 text-center text-slate-700">{r.stat.prenotazioni}</td>
+                    <td className="px-4 py-3 text-center text-slate-700">{r.stat.persone}</td>
+                    <td className="px-4 py-3 text-center text-slate-700">{r.stat.scansioni}</td>
+                    <td className="px-4 py-3 text-center font-semibold text-slate-900">{r.stat.personeScansionate}</td>
+                    <td className={`px-4 py-3 text-center font-semibold ${pctClass(pct)}`}>{pct}%</td>
+                  </tr>
+                )
+              })
+            )}
+          </tbody>
+          {righe.length > 0 && (
+            <tfoot>
+              <tr className="border-t-2 border-slate-200 bg-slate-50 font-semibold text-slate-900">
+                <td className="px-4 py-3">Totale</td>
+                <td className="px-4 py-3 text-center">{totali.prenotazioni}</td>
+                <td className="px-4 py-3 text-center">{totali.persone}</td>
+                <td className="px-4 py-3 text-center">{totali.scansioni}</td>
+                <td className="px-4 py-3 text-center">{totali.personeScansionate}</td>
+                <td className={`px-4 py-3 text-center ${pctClass(pctTotale)}`}>{pctTotale}%</td>
+              </tr>
+            </tfoot>
+          )}
+        </table>
+      </div>
+    </main>
+  )
+}
