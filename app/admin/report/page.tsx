@@ -105,6 +105,10 @@ export default async function AdminReportPage({
     })
   const clusterMarche: ClusterProvenienza[] = clusterizzaPunti(puntiMarche, 16)
   const maxPersoneCluster = Math.max(1, ...clusterMarche.map(c => c.persone))
+  const cittaFuoriRegione = cittaOrdinate.filter(c => !isInMarcheView(c.lon, c.lat))
+  const fuoriRegioneLabel = cittaFuoriRegione.length
+    ? `${cittaFuoriRegione.map(c => `${c.nome} (${c.persone})`).join(', ')} — ${cittaFuoriRegione.reduce((acc, c) => acc + c.persone, 0)} persone`
+    : ''
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-6 md:py-8">
@@ -167,39 +171,62 @@ export default async function AdminReportPage({
               )}
             </ol>
 
-            <div className="relative mx-auto w-full max-w-sm" style={{ aspectRatio: `${MARCHE_VIEWBOX_W} / ${MARCHE_VIEWBOX_H}` }}>
-              <svg
-                viewBox={`0 0 ${MARCHE_VIEWBOX_W} ${MARCHE_VIEWBOX_H}`}
-                aria-hidden="true"
-                className="absolute inset-0 h-full w-full"
-              >
-                <path d={MARCHE_PATH_D} fill="#ecf8fd" stroke="#7ec8ec" strokeWidth={1} />
-              </svg>
-              {clusterMarche.map((c, i) => {
-                const r = 6 + (24 - 6) * Math.sqrt(c.persone / maxPersoneCluster)
-                const label =
-                  c.citta.length === 1
-                    ? `${c.citta[0].nome} — ${c.citta[0].persone} persone`
-                    : `${c.citta.map(ct => `${ct.nome} (${ct.persone})`).join(', ')} — ${c.persone} persone`
-                return (
+            <div className="relative mx-auto w-full max-w-sm">
+              <div className="relative w-full" style={{ aspectRatio: `${MARCHE_VIEWBOX_W} / ${MARCHE_VIEWBOX_H}` }}>
+                <svg
+                  viewBox={`0 0 ${MARCHE_VIEWBOX_W} ${MARCHE_VIEWBOX_H}`}
+                  aria-hidden="true"
+                  className="absolute inset-0 h-full w-full"
+                >
+                  <path d={MARCHE_PATH_D} fill="#ecf8fd" stroke="#7ec8ec" strokeWidth={1} />
+                </svg>
+                {clusterMarche.map((c, i) => {
+                  const r = 6 + (24 - 6) * Math.sqrt(c.persone / maxPersoneCluster)
+                  const label =
+                    c.citta.length === 1
+                      ? `${c.citta[0].nome} — ${c.citta[0].persone} persone`
+                      : `${c.citta.map(ct => `${ct.nome} (${ct.persone})`).join(', ')} — ${c.persone} persone`
+                  return (
+                    <button
+                      key={i}
+                      type="button"
+                      aria-label={label}
+                      className="group absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-full border-2 border-white bg-sass-600 shadow-md transition-transform hover:z-10 hover:scale-110"
+                      style={{
+                        left: `${(c.x / MARCHE_VIEWBOX_W) * 100}%`,
+                        top: `${(c.y / MARCHE_VIEWBOX_H) * 100}%`,
+                        width: r * 2,
+                        height: r * 2,
+                      }}
+                    >
+                      <span className="pointer-events-none absolute bottom-[calc(100%+9px)] left-1/2 z-20 w-max max-w-[200px] -translate-x-1/2 translate-y-1 rounded-lg bg-slate-900 px-2.5 py-1.5 text-center font-mono text-[11px] font-bold leading-tight text-white opacity-0 transition-all group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100">
+                        {label}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+
+              {cittaFuoriRegione.length > 0 && (
+                <div className="absolute -top-2 right-0.5 flex flex-col items-center gap-0.5">
+                  <svg className="h-[30px] w-[34px] text-slate-400" viewBox="0 0 50 44" fill="none" aria-hidden="true">
+                    <path d="M6,4 C 34,4 34,26 25,38" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M25,38 L18,31 M25,38 L28,29" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
                   <button
-                    key={i}
                     type="button"
-                    aria-label={label}
-                    className="group absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-full border-2 border-white bg-sass-600 shadow-md transition-transform hover:z-10 hover:scale-110"
-                    style={{
-                      left: `${(c.x / MARCHE_VIEWBOX_W) * 100}%`,
-                      top: `${(c.y / MARCHE_VIEWBOX_H) * 100}%`,
-                      width: r * 2,
-                      height: r * 2,
-                    }}
+                    aria-label={`Fuori regione: ${fuoriRegioneLabel}`}
+                    className="group relative h-[15px] w-[15px] cursor-pointer rounded-full border-2 border-white bg-slate-400 shadow-md transition-transform hover:z-10 hover:scale-110"
                   >
-                    <span className="pointer-events-none absolute bottom-[calc(100%+9px)] left-1/2 z-20 w-max max-w-[200px] -translate-x-1/2 translate-y-1 rounded-lg bg-slate-900 px-2.5 py-1.5 text-center font-mono text-[11px] font-bold leading-tight text-white opacity-0 transition-all group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100">
-                      {label}
+                    <span className="pointer-events-none absolute bottom-[calc(100%+9px)] right-0 z-20 w-max max-w-[220px] translate-y-1 rounded-lg bg-slate-900 px-2.5 py-1.5 text-center font-mono text-[11px] font-bold leading-tight text-white opacity-0 transition-all group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100">
+                      Fuori regione: {fuoriRegioneLabel}
                     </span>
                   </button>
-                )
-              })}
+                  <span className="whitespace-nowrap font-mono text-[9.5px] font-bold uppercase tracking-wider text-slate-400">
+                    Fuori regione
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>

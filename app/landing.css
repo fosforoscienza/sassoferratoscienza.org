@@ -722,6 +722,68 @@ button { font: inherit; }
   transform: translateX(-50%) translateY(0);
 }
 
+.provenienza-map-wrap { position: relative; }
+
+/* Pallino "fuori regione": fuori dal riquadro della mappa, con una freccia
+   che lo collega, per le città che sulla scala Marche non rientrerebbero. */
+.provenienza-fuori {
+  position: absolute;
+  top: -8px;
+  right: 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.provenienza-fuori__arrow {
+  width: 34px;
+  height: 30px;
+  color: var(--ink-3);
+}
+.provenienza-fuori__arrow path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.provenienza-dot--fuori {
+  position: static;
+  transform: none;
+  width: 15px;
+  height: 15px;
+  background: var(--ink-3);
+}
+.provenienza-dot--fuori:hover,
+.provenienza-dot--fuori:focus-visible {
+  transform: scale(1.15);
+}
+/* Il pallino è vicino al bordo destro: la legenda si apre verso sinistra
+   invece che centrata, per non uscire dallo schermo. */
+.provenienza-dot--fuori .provenienza-dot__tooltip {
+  left: auto;
+  right: 0;
+  transform: translateY(4px);
+}
+.provenienza-dot--fuori:hover .provenienza-dot__tooltip,
+.provenienza-dot--fuori:focus-visible .provenienza-dot__tooltip {
+  transform: translateY(0);
+}
+.provenienza-dot--fuori .provenienza-dot__tooltip::after {
+  left: auto;
+  right: 5px;
+  transform: none;
+}
+.provenienza-fuori__label {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+
 /* =========================================================================
    Galleria foto dell'evento
    ========================================================================= */

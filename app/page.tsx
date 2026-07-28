@@ -156,6 +156,7 @@ export type ProvenienzaReport = {
   altreCitta: number
   altrePersone: number
   cluster: ClusterProvenienza[]
+  fuoriRegione: { citta: ProvenienzaRiga[]; persone: number } | null
 }
 
 function escapeHtml(s: string): string {
@@ -247,6 +248,22 @@ function buildProvenienzaHtml(p: ProvenienzaReport): string {
     })
     .join('')
 
+  const fuoriHtml = p.fuoriRegione
+    ? (() => {
+        const label = `${p.fuoriRegione!.citta.map(c => `${escapeHtml(c.nome)} (${c.persone})`).join(', ')} — ${p.fuoriRegione!.persone} persone`
+        return `<div class="provenienza-fuori">
+            <svg class="provenienza-fuori__arrow" viewBox="0 0 50 44" aria-hidden="true">
+              <path d="M6,4 C 34,4 34,26 25,38" fill="none" />
+              <path d="M25,38 L18,31 M25,38 L28,29" fill="none" />
+            </svg>
+            <button type="button" class="provenienza-dot provenienza-dot--fuori" aria-label="Fuori regione: ${label}">
+              <span class="provenienza-dot__tooltip">Fuori regione: ${label}</span>
+            </button>
+            <span class="provenienza-fuori__label">Fuori regione</span>
+          </div>`
+      })()
+    : ''
+
   return `<div class="provenienza" data-reveal>
       <div class="provenienza__head">
         <div class="eyebrow">Da dove arrivano i partecipanti</div>
@@ -254,11 +271,14 @@ function buildProvenienzaHtml(p: ProvenienzaReport): string {
       </div>
       <div class="provenienza__card">
         <ol class="provenienza-list">${righeLista}${altraRiga}</ol>
-        <div class="provenienza-map">
-          <svg class="provenienza-map__outline" viewBox="0 0 ${MARCHE_VIEWBOX_W} ${MARCHE_VIEWBOX_H}" aria-hidden="true">
-            <path d="${MARCHE_PATH_D}" />
-          </svg>
-          ${dotsHtml}
+        <div class="provenienza-map-wrap">
+          <div class="provenienza-map">
+            <svg class="provenienza-map__outline" viewBox="0 0 ${MARCHE_VIEWBOX_W} ${MARCHE_VIEWBOX_H}" aria-hidden="true">
+              <path d="${MARCHE_PATH_D}" />
+            </svg>
+            ${dotsHtml}
+          </div>
+          ${fuoriHtml}
         </div>
       </div>
     </div>`
@@ -332,11 +352,18 @@ export default async function Home() {
               const [x, y] = projectLonLatMarche(c.lon, c.lat)
               return { nome: c.nome, x, y, persone: c.persone }
             })
+          const fuoriRegioneCitta = cittaOrdinate.filter(c => !isInMarcheView(c.lon, c.lat))
           provenienza = {
             top,
             altreCitta: resto.length,
             altrePersone: resto.reduce((acc, c) => acc + c.persone, 0),
             cluster: clusterizzaPunti(puntiMarche, 16),
+            fuoriRegione: fuoriRegioneCitta.length
+              ? {
+                  citta: fuoriRegioneCitta.map(c => ({ nome: c.nome, sigla: c.sigla, persone: c.persone })),
+                  persone: fuoriRegioneCitta.reduce((acc, c) => acc + c.persone, 0),
+                }
+              : null,
           }
         }
       }
