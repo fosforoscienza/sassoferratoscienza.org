@@ -1,6 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { edizioniDisponibili, risolviEdizione } from '@/lib/types'
 import EdizioneSwitch from '@/components/EdizioneSwitch'
+import { lookupCap } from '@/lib/cap-geo'
+import { MARCHE_VIEWBOX_W, MARCHE_VIEWBOX_H, MARCHE_PATH_D, projectLonLatMarche, isInMarcheView } from '@/lib/marche-map'
+import { clusterizzaPunti, type ClusterProvenienza } from '@/lib/geo-cluster'
 
 export const revalidate = 0
 
@@ -42,7 +45,7 @@ export default async function AdminReportPage({
       .from('sass_eventi')
       .select('id, numero, categoria, colore, titolo, edizione')
       .order('numero'),
-    supabase.from('sass_prenotazioni').select('evento_id, n_persone, check_in_at'),
+    supabase.from('sass_prenotazioni').select('evento_id, n_persone, check_in_at, cap'),
   ])
 
   const edizioni = edizioniDisponibili(eventiTutti ?? [])
@@ -78,6 +81,31 @@ export default async function AdminReportPage({
 
   const pctTotale = totali.persone > 0 ? Math.round((totali.personeScansionate / totali.persone) * 100) : 0
 
+  // Provenienza (da CAP): persone iscritte per città, prime 10 + resto aggregato,
+  // e una mappa delle Marche (dove arriva la stragrande maggioranza) coi comuni
+  // vicini raggruppati in un unico pallino quando sono troppo ravvicinati.
+  const personePerCitta = new Map<string, { nome: string; sigla: string; persone: number; lat: number; lon: number }>()
+  for (const p of prenotazioni) {
+    if (!p.cap) continue
+    const geo = lookupCap(p.cap)
+    if (!geo) continue
+    const key = `${geo.c}|${geo.s}`
+    const cur = personePerCitta.get(key) ?? { nome: geo.c, sigla: geo.s, persone: 0, lat: geo.lat, lon: geo.lng }
+    cur.persone += p.n_persone ?? 0
+    personePerCitta.set(key, cur)
+  }
+  const cittaOrdinate = Array.from(personePerCitta.values()).sort((a, b) => b.persone - a.persone)
+  const cittaTop = cittaOrdinate.slice(0, 10)
+  const cittaResto = cittaOrdinate.slice(10)
+  const puntiMarche = cittaOrdinate
+    .filter(c => isInMarcheView(c.lon, c.lat))
+    .map(c => {
+      const [x, y] = projectLonLatMarche(c.lon, c.lat)
+      return { nome: c.nome, x, y, persone: c.persone }
+    })
+  const clusterMarche: ClusterProvenienza[] = clusterizzaPunti(puntiMarche, 16)
+  const maxPersoneCluster = Math.max(1, ...clusterMarche.map(c => c.persone))
+
   return (
     <main className="mx-auto max-w-6xl px-4 py-6 md:py-8">
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -109,6 +137,73 @@ export default async function AdminReportPage({
         <StatCard label="Persone scansionate" value={totali.personeScansionate} />
         <StatCard label="% presenze" value={`${pctTotale}%`} />
       </div>
+
+      {cittaOrdinate.length > 0 && (
+        <div className="mt-6">
+          <h2 className="font-display text-xl font-bold text-brown">Da dove arrivano i partecipanti</h2>
+          <p className="mt-1 text-xs text-slate-500">
+            In base al CAP indicato in prenotazione. Mappa delle Marche, dove arriva la maggior parte dei partecipanti.
+          </p>
+          <div className="mt-3 grid grid-cols-1 gap-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-[minmax(220px,320px)_1fr] md:p-6">
+            <ol className="divide-y divide-slate-100 md:border-r md:border-slate-100 md:pr-6">
+              {cittaTop.map((c, i) => (
+                <li key={`${c.nome}-${c.sigla}`} className="flex items-baseline justify-between gap-3 py-2.5 text-sm">
+                  <span className="font-semibold text-slate-900">
+                    <span className="mr-1.5 font-mono text-xs font-bold text-slate-400">{i + 1}.</span>
+                    {c.nome} <span className="font-mono text-xs font-bold text-slate-400">({c.sigla})</span>
+                  </span>
+                  <span className="shrink-0 font-mono font-bold text-sass-700">{c.persone}</span>
+                </li>
+              ))}
+              {cittaResto.length > 0 && (
+                <li className="flex items-baseline justify-between gap-3 py-2.5 text-sm text-slate-500">
+                  <span className="font-semibold">
+                    <span className="mr-1.5">•</span>Altre città ({cittaResto.length})
+                  </span>
+                  <span className="shrink-0 font-mono font-bold">
+                    {cittaResto.reduce((acc, c) => acc + c.persone, 0)}
+                  </span>
+                </li>
+              )}
+            </ol>
+
+            <div className="relative mx-auto w-full max-w-sm" style={{ aspectRatio: `${MARCHE_VIEWBOX_W} / ${MARCHE_VIEWBOX_H}` }}>
+              <svg
+                viewBox={`0 0 ${MARCHE_VIEWBOX_W} ${MARCHE_VIEWBOX_H}`}
+                aria-hidden="true"
+                className="absolute inset-0 h-full w-full"
+              >
+                <path d={MARCHE_PATH_D} fill="#ecf8fd" stroke="#7ec8ec" strokeWidth={1} />
+              </svg>
+              {clusterMarche.map((c, i) => {
+                const r = 6 + (24 - 6) * Math.sqrt(c.persone / maxPersoneCluster)
+                const label =
+                  c.citta.length === 1
+                    ? `${c.citta[0].nome} — ${c.citta[0].persone} persone`
+                    : `${c.citta.map(ct => `${ct.nome} (${ct.persone})`).join(', ')} — ${c.persone} persone`
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    aria-label={label}
+                    className="group absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-full border-2 border-white bg-sass-600 shadow-md transition-transform hover:z-10 hover:scale-110"
+                    style={{
+                      left: `${(c.x / MARCHE_VIEWBOX_W) * 100}%`,
+                      top: `${(c.y / MARCHE_VIEWBOX_H) * 100}%`,
+                      width: r * 2,
+                      height: r * 2,
+                    }}
+                  >
+                    <span className="pointer-events-none absolute bottom-[calc(100%+9px)] left-1/2 z-20 w-max max-w-[200px] -translate-x-1/2 translate-y-1 rounded-lg bg-slate-900 px-2.5 py-1.5 text-center font-mono text-[11px] font-bold leading-tight text-white opacity-0 transition-all group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100">
+                      {label}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Mobile */}
       <ul className="-mx-4 mt-6 divide-y divide-slate-100 border-y border-slate-200 bg-white shadow-sm md:hidden">
