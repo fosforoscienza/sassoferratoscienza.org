@@ -20,6 +20,13 @@ const csp = [
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // Garantisce che le foto in public/galleria vengano incluse nel bundle
+  // della funzione serverless anche se lette a runtime via fs.readdirSync.
+  experimental: {
+    outputFileTracingIncludes: {
+      '/': ['./public/galleria/**/*'],
+    },
+  },
   async headers() {
     return [
       {
