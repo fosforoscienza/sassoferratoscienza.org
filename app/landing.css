@@ -571,48 +571,147 @@ button { font: inherit; }
   color: var(--ink-2);
 }
 
-.edizione-chart {
+/* Provenienza dei partecipanti: classifica città + mappa a pallini */
+.provenienza {
+  margin-bottom: clamp(28px, 4vw, 44px);
+}
+.provenienza__head {
+  margin-bottom: 16px;
+}
+.provenienza__head p {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--ink-2);
+}
+.provenienza__grid {
   display: grid;
-  gap: 14px;
-  padding: 24px clamp(20px, 3vw, 30px);
+  grid-template-columns: minmax(220px, 320px) 1fr;
+  gap: clamp(16px, 3vw, 28px);
+  align-items: stretch;
+}
+@media (max-width: 720px) {
+  .provenienza__grid { grid-template-columns: 1fr; }
+}
+
+.provenienza-list {
+  margin: 0;
+  padding: 6px clamp(16px, 2.4vw, 22px);
+  list-style: none;
+  counter-reset: provenienza;
   border-radius: var(--radius-card);
   background: var(--surface);
   border: 1px solid var(--surface-border);
   box-shadow: var(--shadow-card);
-  margin-bottom: clamp(28px, 4vw, 44px);
 }
-.edizione-bar {
-  display: grid;
-  grid-template-columns: minmax(110px, 160px) 1fr 28px;
-  align-items: center;
-  gap: 14px;
+.provenienza-list li {
+  counter-increment: provenienza;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--surface-border);
+  font-size: 14px;
 }
-.edizione-bar__label {
-  font-size: 12.5px;
-  line-height: 1.25;
+.provenienza-list li:last-child { border-bottom: none; }
+.provenienza-list__citta {
   font-weight: 700;
   color: var(--ink);
 }
-.edizione-bar__track {
+.provenienza-list__citta::before {
+  content: counter(provenienza) '.';
+  display: inline-block;
+  min-width: 1.6em;
+  margin-right: 2px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--ink-3);
+}
+.provenienza-list__persone {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--accent-deep);
+}
+.provenienza-list__altre .provenienza-list__citta { color: var(--ink-2); }
+.provenienza-list__altre .provenienza-list__citta::before { content: '•'; }
+.provenienza-list__altre .provenienza-list__persone { color: var(--ink-2); }
+
+.provenienza-map {
   position: relative;
-  height: 18px;
-  border-radius: var(--radius-pill);
-  background: rgba(0, 0, 0, .05);
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 360 / 460;
+  margin: 0 auto;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  box-shadow: var(--shadow-card);
   overflow: hidden;
 }
-.edizione-bar__fill {
+.provenienza-map__outline {
   position: absolute;
-  inset: 0 auto 0 0;
-  border-radius: var(--radius-pill);
-  min-width: 18px;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .06);
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
-.edizione-bar__value {
+.provenienza-map__outline path {
+  fill: color-mix(in srgb, var(--accent) 8%, var(--surface));
+  stroke: color-mix(in srgb, var(--accent) 35%, transparent);
+  stroke-width: 1;
+}
+.provenienza-dot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--surface);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .22);
+  cursor: pointer;
+  padding: 0;
+  transition: transform .2s var(--ease), box-shadow .2s var(--ease);
+}
+.provenienza-dot:hover,
+.provenienza-dot:focus-visible {
+  transform: translate(-50%, -50%) scale(1.15);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .3);
+  z-index: 2;
+  outline: none;
+}
+.provenienza-dot__tooltip {
+  position: absolute;
+  bottom: calc(100% + 9px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  width: max-content;
+  max-width: 200px;
+  padding: 7px 11px;
+  border-radius: 10px;
+  background: var(--ink);
+  color: #fff;
   font-family: var(--font-mono);
-  font-size: 12.5px;
+  font-size: 11.5px;
   font-weight: 700;
-  color: var(--ink-2);
-  text-align: right;
+  line-height: 1.4;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .15s ease, transform .15s ease;
+  z-index: 3;
+}
+.provenienza-dot__tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--ink);
+}
+.provenienza-dot:hover .provenienza-dot__tooltip,
+.provenienza-dot:focus-visible .provenienza-dot__tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 
 /* =========================================================================

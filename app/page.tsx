@@ -5,6 +5,8 @@ import { createAdminClient } from '@/lib/supabase/server'
 import LandingInteractions from './LandingInteractions'
 import { LANDING_HTML } from './landing-html'
 import { edizioniDisponibili, risolviEdizione } from '@/lib/types'
+import { lookupCap } from '@/lib/cap-geo'
+import { ITALY_VIEWBOX_W, ITALY_VIEWBOX_H, ITALY_PATH_D, clusterizzaProvenienza, type ProvenienzaCluster } from '@/lib/italy-map'
 
 // Rivalida la home (e quindi la griglia orari) ogni 5 minuti.
 export const revalidate = 300
@@ -147,12 +149,25 @@ function buildOrariGrid(eventi: EventoLite[], turniByEvento: Map<string, TurnoLi
 const GALLERY_DIR = path.join(process.cwd(), 'public', 'galleria')
 const GALLERY_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp'])
 
-type BarraAttivita = { label: string; count: number; colore: string }
+export type ProvenienzaRiga = { nome: string; persone: number }
+export type ProvenienzaReport = {
+  top: ProvenienzaRiga[]
+  altreCitta: number
+  altrePersone: number
+  cluster: ProvenienzaCluster[]
+}
 
-// Report grafico + galleria foto dell'edizione conclusa. `barre` include i
-// laboratori (un conteggio per turno svolto) più Science Show e concerto,
-// che non sono in sass_eventi ma si sono svolti una volta ciascuno.
-function buildEdizioneHtml(barre: BarraAttivita[], attivitaSvolte: number, personeIscritte: number | null): string {
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+
+// Report grafico + galleria foto dell'edizione conclusa: numeri, provenienza
+// dei partecipanti (da CAP) e foto.
+function buildEdizioneHtml(
+  attivitaSvolte: number,
+  personeIscritte: number | null,
+  provenienza: ProvenienzaReport | null
+): string {
   let files: string[] = []
   try {
     files = fs
@@ -163,18 +178,6 @@ function buildEdizioneHtml(barre: BarraAttivita[], attivitaSvolte: number, perso
     files = []
   }
 
-  const maxCount = Math.max(1, ...barre.map(b => b.count))
-  const barreHtml = barre
-    .map(b => {
-      const pct = Math.max(6, Math.round((b.count / maxCount) * 100))
-      return `<div class="edizione-bar">
-          <span class="edizione-bar__label">${b.label}</span>
-          <span class="edizione-bar__track"><span class="edizione-bar__fill" style="width:${pct}%;background:${b.colore}"></span></span>
-          <span class="edizione-bar__value">${b.count}</span>
-        </div>`
-    })
-    .join('')
-
   const items = files
     .map((f, i) => {
       const src = `/galleria/${encodeURIComponent(f)}`
@@ -183,6 +186,8 @@ function buildEdizioneHtml(barre: BarraAttivita[], attivitaSvolte: number, perso
           </a>`
     })
     .join('')
+
+  const provenienzaHtml = provenienza ? buildProvenienzaHtml(provenienza) : ''
 
   return `<section id="edizione" class="section edizione">
       <div class="container">
@@ -205,11 +210,57 @@ function buildEdizioneHtml(barre: BarraAttivita[], attivitaSvolte: number, perso
             : ''}
         </div>
 
-        <div class="edizione-chart" data-reveal>${barreHtml}</div>
+        ${provenienzaHtml}
 
         ${items ? `<div class="gallery__grid">${items}</div>` : ''}
       </div>
     </section>`
+}
+
+function buildProvenienzaHtml(p: ProvenienzaReport): string {
+  const righeLista = p.top
+    .map(
+      r => `<li><span class="provenienza-list__citta">${escapeHtml(r.nome)}</span><span class="provenienza-list__persone">${r.persone}</span></li>`
+    )
+    .join('')
+  const altraRiga =
+    p.altreCitta > 0
+      ? `<li class="provenienza-list__altre"><span class="provenienza-list__citta">Altre città (${p.altreCitta})</span><span class="provenienza-list__persone">${p.altrePersone}</span></li>`
+      : ''
+
+  const maxPersone = Math.max(1, ...p.cluster.map(c => c.persone))
+  const minR = 6
+  const maxR = 24
+  const dotsHtml = p.cluster
+    .map(c => {
+      const r = minR + (maxR - minR) * Math.sqrt(c.persone / maxPersone)
+      const leftPct = (c.x / ITALY_VIEWBOX_W) * 100
+      const topPct = (c.y / ITALY_VIEWBOX_H) * 100
+      const label =
+        c.citta.length === 1
+          ? `${escapeHtml(c.citta[0].nome)} — ${c.citta[0].persone} persone`
+          : `${c.citta.map(ct => `${escapeHtml(ct.nome)} (${ct.persone})`).join(', ')} — ${c.persone} persone`
+      return `<button type="button" class="provenienza-dot" style="left:${leftPct.toFixed(2)}%;top:${topPct.toFixed(2)}%;width:${(r * 2).toFixed(1)}px;height:${(r * 2).toFixed(1)}px" aria-label="${label}">
+          <span class="provenienza-dot__tooltip">${label}</span>
+        </button>`
+    })
+    .join('')
+
+  return `<div class="provenienza" data-reveal>
+      <div class="provenienza__head">
+        <div class="eyebrow">Da dove arrivano i partecipanti</div>
+        <p>In base al CAP indicato in fase di prenotazione.</p>
+      </div>
+      <div class="provenienza__grid">
+        <ol class="provenienza-list">${righeLista}${altraRiga}</ol>
+        <div class="provenienza-map">
+          <svg class="provenienza-map__outline" viewBox="0 0 ${ITALY_VIEWBOX_W} ${ITALY_VIEWBOX_H}" aria-hidden="true">
+            <path d="${ITALY_PATH_D}" />
+          </svg>
+          ${dotsHtml}
+        </div>
+      </div>
+    </div>`
 }
 
 export default async function Home() {
@@ -244,28 +295,50 @@ export default async function Home() {
 
   if (eventi.length) {
     try {
-      // Persone iscritte (prenotate, non scansionate): conteggio aggregato,
-      // non dati personali. sass_prenotazioni è leggibile solo dagli admin,
-      // quindi serve la service role — come già per la disponibilità in /prenota.
+      // Persone iscritte e provenienza (CAP): conteggi aggregati, non dati
+      // personali (niente nome/cognome/email). sass_prenotazioni è leggibile
+      // solo dagli admin, quindi serve la service role — come già per la
+      // disponibilità in /prenota.
       let personeIscritte: number | null = null
+      let provenienza: ProvenienzaReport | null = null
       if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
         const admin = createAdminClient()
         const eventoIds = eventi.map(e => e.id)
-        const { data: pren } = await admin.from('sass_prenotazioni').select('n_persone').in('evento_id', eventoIds)
-        personeIscritte = (pren ?? []).reduce((acc, p) => acc + (p.n_persone ?? 0), 0)
+        const { data: pren } = await admin.from('sass_prenotazioni').select('n_persone, cap').in('evento_id', eventoIds)
+        const righe = pren ?? []
+        personeIscritte = righe.reduce((acc, p) => acc + (p.n_persone ?? 0), 0)
+
+        const personePerCitta = new Map<string, { persone: number; lat: number; lon: number }>()
+        for (const r of righe) {
+          if (!r.cap) continue
+          const geo = lookupCap(r.cap)
+          if (!geo) continue
+          const cur = personePerCitta.get(geo.c) ?? { persone: 0, lat: geo.lat, lon: geo.lng }
+          cur.persone += r.n_persone ?? 0
+          personePerCitta.set(geo.c, cur)
+        }
+        const cittaOrdinate = Array.from(personePerCitta.entries())
+          .map(([nome, v]) => ({ nome, ...v }))
+          .sort((a, b) => b.persone - a.persone)
+
+        if (cittaOrdinate.length) {
+          const top = cittaOrdinate.slice(0, 10).map(c => ({ nome: c.nome, persone: c.persone }))
+          const resto = cittaOrdinate.slice(10)
+          provenienza = {
+            top,
+            altreCitta: resto.length,
+            altrePersone: resto.reduce((acc, c) => acc + c.persone, 0),
+            cluster: clusterizzaProvenienza(
+              cittaOrdinate.map(c => ({ citta: c.nome, lat: c.lat, lon: c.lon, persone: c.persone }))
+            ),
+          }
+        }
       }
 
-      const barre: BarraAttivita[] = eventi.map(e => ({
-        label: e.titolo,
-        count: e.a_turni ? turniByEvento.get(e.id)?.length ?? 0 : 1,
-        colore: e.colore,
-      }))
-      // Science Show e concerto: a ingresso libero, non in sass_eventi, un'unica replica ciascuno.
-      barre.push({ label: 'Science Show', count: 1, colore: '#f08c2e' })
-      barre.push({ label: 'Concerto "Ancora Tu"', count: 1, colore: '#f3c52e' })
+      const attivitaSvolte =
+        eventi.reduce((acc, e) => acc + (e.a_turni ? turniByEvento.get(e.id)?.length ?? 0 : 1), 0) + 2 // + Science Show e concerto
 
-      const attivitaSvolte = barre.reduce((acc, b) => acc + b.count, 0)
-      edizioneHtml = buildEdizioneHtml(barre, attivitaSvolte, personeIscritte)
+      edizioneHtml = buildEdizioneHtml(attivitaSvolte, personeIscritte, provenienza)
     } catch (err) {
       console.error('[home] report edizione non generato:', err)
     }
