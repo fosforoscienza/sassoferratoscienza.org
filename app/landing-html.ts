@@ -269,7 +269,7 @@ export const LANDING_HTML = `
           </div>
 
           <div class="map" data-reveal data-reveal-delay="120">
-            <iframe class="map__frame" title="Mappa · Piazza Bartolo, Sassoferrato (AN)" src="https://www.google.com/maps?q=Piazza%20Gaspare%20Bartolo%2C%20Sassoferrato%20AN&amp;z=16&amp;output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+            <iframe class="map__frame" title="Mappa · Piazza Bartolo, Sassoferrato (AN)" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1212.3225803344974!2d12.856257240922396!3d43.43241610090776!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x132db46392b21953%3A0x98cabc29a1ead9e9!2sVia%20Cavour%2C%2060041%20Sassoferrato%20AN!5e0!3m2!1sit!2sit!4v1785234634960!5m2!1sit!2sit" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
           </div>
         </div>
       </div>

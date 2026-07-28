@@ -9,6 +9,7 @@ const csp = [
   "img-src 'self' data: blob: https://*.supabase.co https:",
   "font-src 'self' https://fonts.gstatic.com",
   "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.resend.com",
+  "frame-src https://www.google.com",
   "media-src 'self'",
   "object-src 'none'",
   "base-uri 'self'",
