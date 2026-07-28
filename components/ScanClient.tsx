@@ -21,6 +21,7 @@ export type EventoScan = {
   ora_fine: string
   a_turni: boolean
   capienza: number | null
+  checkin_attivo: boolean
   prenotati_persone: number
   checkin_persone: number
   turni: Turno[]
@@ -81,6 +82,14 @@ function Conteggini({ checkin, prenotati, cap }: { checkin: number; prenotati: n
   )
 }
 
+function ChiusoBadge() {
+  return (
+    <span className="shrink-0 rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+      Chiuso
+    </span>
+  )
+}
+
 function TargetPicker({
   palchi,
   onSelect,
@@ -105,12 +114,17 @@ function TargetPicker({
                 {palco.eventi.map(ev =>
                   ev.a_turni ? (
                     <div key={ev.evento_id}>
-                      <p className="mb-2 text-sm font-bold text-sass-900">{ev.titolo}</p>
+                      <p className="mb-2 flex items-center gap-2 text-sm font-bold text-sass-900">
+                        {ev.titolo}
+                        {!ev.checkin_attivo && <ChiusoBadge />}
+                      </p>
                       <div className="grid gap-2">
                         {ev.turni.map(t => (
                           <button
                             key={t.turno_id}
+                            disabled={!ev.checkin_attivo}
                             onClick={() =>
+                              ev.checkin_attivo &&
                               onSelect({
                                 kind: 'target',
                                 target: {
@@ -126,7 +140,7 @@ function TargetPicker({
                                 },
                               })
                             }
-                            className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-left transition hover:border-sass-300 hover:bg-sass-50"
+                            className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-left transition hover:border-sass-300 hover:bg-sass-50 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-slate-200 disabled:hover:bg-white"
                           >
                             <span className="text-sm font-semibold text-slate-800">
                               {t.ora_inizio}–{t.ora_fine}
@@ -139,7 +153,9 @@ function TargetPicker({
                   ) : (
                     <button
                       key={ev.evento_id}
+                      disabled={!ev.checkin_attivo}
                       onClick={() =>
+                        ev.checkin_attivo &&
                         onSelect({
                           kind: 'target',
                           target: {
@@ -155,10 +171,13 @@ function TargetPicker({
                           },
                         })
                       }
-                      className="flex w-full items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-left transition hover:border-sass-300 hover:bg-sass-50"
+                      className="flex w-full items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-left transition hover:border-sass-300 hover:bg-sass-50 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-slate-200 disabled:hover:bg-white"
                     >
                       <span className="min-w-0">
-                        <span className="block truncate text-sm font-semibold text-slate-800">{ev.titolo}</span>
+                        <span className="flex items-center gap-2 truncate text-sm font-semibold text-slate-800">
+                          {ev.titolo}
+                          {!ev.checkin_attivo && <ChiusoBadge />}
+                        </span>
                         <span className="block text-xs text-slate-500">
                           {ev.ora_inizio}–{ev.ora_fine}
                         </span>

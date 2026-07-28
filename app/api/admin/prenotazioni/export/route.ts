@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { edizioniDisponibili, risolviEdizione } from '@/lib/types'
 
 async function requireAdmin() {
   const supabase = createClient()
@@ -45,6 +46,14 @@ export async function GET(req: Request) {
   const turnoId = rawTurno && UUID_RE.test(rawTurno) ? rawTurno : null
   const eventoId = rawEvento && UUID_RE.test(rawEvento) ? rawEvento : null
 
+  let idsEdizione: string[] = []
+  if (!turnoId && !eventoId) {
+    const { data: eventiTutti } = await auth.supabase.from('sass_eventi').select('id, edizione')
+    const edizioni = edizioniDisponibili(eventiTutti ?? [])
+    const edizioneSelezionata = risolviEdizione(edizioni, url.searchParams.get('edizione') ?? undefined)
+    idsEdizione = (eventiTutti ?? []).filter(e => e.edizione === edizioneSelezionata).map(e => e.id)
+  }
+
   let matchingEventiIds: string[] = []
   if (q) {
     const { data: ev } = await auth.supabase
@@ -64,6 +73,7 @@ export async function GET(req: Request) {
 
   if (turnoId) query = query.eq('turno_id', turnoId)
   else if (eventoId) query = query.eq('evento_id', eventoId)
+  else if (idsEdizione.length) query = query.in('evento_id', idsEdizione)
   if (onlyCheckin) query = query.not('check_in_at', 'is', null)
   if (q) {
     const personFilter = `nome.ilike.%${q}%,cognome.ilike.%${q}%,email.ilike.%${q}%`

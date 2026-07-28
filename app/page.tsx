@@ -3,6 +3,7 @@ import path from 'node:path'
 import { createServerClient } from '@supabase/ssr'
 import LandingInteractions from './LandingInteractions'
 import { LANDING_HTML } from './landing-html'
+import { edizioniDisponibili, risolviEdizione } from '@/lib/types'
 
 // Rivalida la home (e quindi la griglia orari) ogni 5 minuti.
 export const revalidate = 300
@@ -104,7 +105,7 @@ function publicClient() {
   )
 }
 
-type EventoLite = { id: string; numero: number; titolo: string; colore: string; a_turni: boolean }
+type EventoLite = { id: string; numero: number; titolo: string; colore: string; a_turni: boolean; edizione: number }
 type TurnoLite = { time: string; id: string }
 
 function buildOrariGrid(eventi: EventoLite[], turniByEvento: Map<string, TurnoLite[]>): string {
@@ -185,10 +186,14 @@ export default async function Home() {
   const idByNumero = new Map<number, string>()
   try {
     const supabase = publicClient()
-    const [{ data: eventi }, { data: turni }] = await Promise.all([
-      supabase.from('sass_eventi').select('id, numero, titolo, colore, a_turni').order('numero', { ascending: true }),
+    const [{ data: eventiTutti }, { data: turni }] = await Promise.all([
+      supabase.from('sass_eventi').select('id, numero, titolo, colore, a_turni, edizione').order('numero', { ascending: true }),
       supabase.from('sass_turni').select('id, evento_id, ora_inizio').order('ora_inizio', { ascending: true }),
     ])
+    // Solo l'edizione più recente: le edizioni passate restano nel database
+    // per lo storico ma non devono comparire sulla home pubblica.
+    const edizioneCorrente = risolviEdizione(edizioniDisponibili((eventiTutti ?? []) as EventoLite[]))
+    const eventi = ((eventiTutti ?? []) as EventoLite[]).filter(e => e.edizione === edizioneCorrente)
     const turniByEvento = new Map<string, TurnoLite[]>()
     for (const t of turni ?? []) {
       const hhmm = String(t.ora_inizio).slice(0, 5)
@@ -196,8 +201,8 @@ export default async function Home() {
       if (!arr.some(x => x.time === hhmm)) arr.push({ time: hhmm, id: t.id })
       turniByEvento.set(t.evento_id, arr)
     }
-    for (const e of (eventi ?? []) as EventoLite[]) idByNumero.set(e.numero, e.id)
-    gridHtml = buildOrariGrid((eventi ?? []) as EventoLite[], turniByEvento)
+    for (const e of eventi) idByNumero.set(e.numero, e.id)
+    gridHtml = buildOrariGrid(eventi, turniByEvento)
   } catch (err) {
     console.error('[home] griglia orari non generata:', err)
   }

@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { formatRangeOrario } from '@/lib/types'
+import { formatRangeOrario, edizioniDisponibili, risolviEdizione } from '@/lib/types'
+import EdizioneSwitch from '@/components/EdizioneSwitch'
 
 export const revalidate = 0
 
@@ -13,13 +14,17 @@ function semaforoClass(ratio: number) {
   return 'text-emerald-600'
 }
 
-export default async function AdminAttivitaPage() {
+export default async function AdminAttivitaPage({
+  searchParams,
+}: {
+  searchParams: { edizione?: string }
+}) {
   const supabase = createClient()
 
-  const [{ data: eventi }, { data: turni }, { data: prenotazioni }] = await Promise.all([
+  const [{ data: eventiTutti }, { data: turniTutti }, { data: prenotazioniTutte }] = await Promise.all([
     supabase
       .from('sass_eventi')
-      .select('id, numero, categoria, colore, titolo, ora_inizio, ora_fine, luogo, capienza_max, a_turni')
+      .select('id, numero, categoria, colore, titolo, ora_inizio, ora_fine, luogo, capienza_max, a_turni, edizione')
       .order('numero'),
     supabase
       .from('sass_turni')
@@ -27,6 +32,13 @@ export default async function AdminAttivitaPage() {
       .order('ordine'),
     supabase.from('sass_prenotazioni').select('evento_id, turno_id, n_persone, check_in_at'),
   ])
+
+  const edizioni = edizioniDisponibili(eventiTutti ?? [])
+  const edizioneAttiva = risolviEdizione(edizioni, searchParams.edizione)
+  const eventi = (eventiTutti ?? []).filter(e => e.edizione === edizioneAttiva)
+  const eventoIds = new Set(eventi.map(e => e.id))
+  const turni = (turniTutti ?? []).filter(t => eventoIds.has(t.evento_id))
+  const prenotazioni = (prenotazioniTutte ?? []).filter(p => eventoIds.has(p.evento_id))
 
   const turniByEvento = new Map<string, NonNullable<typeof turni>>()
   for (const t of turni ?? []) {
@@ -50,12 +62,18 @@ export default async function AdminAttivitaPage() {
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-6 md:py-8">
-      <div>
-        <h1 className="font-display text-2xl font-black text-brown md:text-3xl">Per attività</h1>
-        <p className="mt-1 text-xs text-slate-600 md:text-sm">
-          {totPrenotazioni} prenotazion{totPrenotazioni === 1 ? 'e' : 'i'} · {totPersone} person
-          {totPersone === 1 ? 'a' : 'e'} · {totCheckin} check-in
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="font-display text-2xl font-black text-brown md:text-3xl">Per attività</h1>
+          <p className="mt-1 text-xs text-slate-600 md:text-sm">
+            {edizioneAttiva ? `Edizione ${edizioneAttiva} · ` : ''}
+            {totPrenotazioni} prenotazion{totPrenotazioni === 1 ? 'e' : 'i'} · {totPersone} person
+            {totPersone === 1 ? 'a' : 'e'} · {totCheckin} check-in
+          </p>
+        </div>
+        {edizioneAttiva && (
+          <EdizioneSwitch edizioni={edizioni} attiva={edizioneAttiva} basePath="/admin/attivita" />
+        )}
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">

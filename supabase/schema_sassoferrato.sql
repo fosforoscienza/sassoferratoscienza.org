@@ -4,6 +4,13 @@
 -- Pensato per essere eseguito SUL PROGETTO SUPABASE DI FOSFORO già esistente:
 -- tutte le tabelle/funzioni/viste sono prefissate `sass_` per non collidere
 -- con gli oggetti di Fosforo. Eseguire una sola volta nel SQL Editor.
+--
+-- Edizioni: sass_eventi.edizione raggruppa i laboratori anno per anno
+-- (2026, 2027, …) e `numero` è univoco solo all'interno di un'edizione. Per
+-- aprire una nuova edizione basta inserire nuovi laboratori con
+-- edizione = 2027: home page, /prenota e la pagina di scan mostrano sempre
+-- e solo l'edizione più recente, mentre le pagine admin (Per attività,
+-- Prenotazioni, Report) restano consultabili per ogni edizione passata.
 -- ============================================================
 
 -- ============================================================
@@ -45,7 +52,7 @@ CREATE POLICY "sass_admin_users_admin_all" ON public.sass_admin_users
 -- ============================================================
 CREATE TABLE IF NOT EXISTS public.sass_eventi (
   id                   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  numero               SMALLINT NOT NULL UNIQUE,
+  numero               SMALLINT NOT NULL,
   categoria            TEXT NOT NULL,
   colore               TEXT NOT NULL DEFAULT '#0f9bd8',
   data                 DATE NOT NULL,
@@ -62,11 +69,19 @@ CREATE TABLE IF NOT EXISTS public.sass_eventi (
   a_turni              BOOLEAN NOT NULL DEFAULT FALSE,
   durata_turno_min     SMALLINT CHECK (durata_turno_min IS NULL OR (durata_turno_min BETWEEN 5 AND 720)),
   capienza_turno       SMALLINT CHECK (capienza_turno IS NULL OR (capienza_turno BETWEEN 1 AND 10000)),
+  -- Anno del festival: raggruppa i laboratori edizione per edizione (2026, 2027, …).
+  edizione             SMALLINT NOT NULL DEFAULT 2026,
+  -- Se falso, /api/checkin rifiuta lo scan dei QR per questo laboratorio
+  -- (indipendente da prenotazioni_attive, che indica invece le attività a
+  -- fruizione libera senza prenotazione).
+  checkin_attivo       BOOLEAN NOT NULL DEFAULT TRUE,
+  UNIQUE (edizione, numero),
   created_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at           TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS sass_eventi_numero_idx ON public.sass_eventi (numero);
+CREATE INDEX IF NOT EXISTS sass_eventi_edizione_idx ON public.sass_eventi (edizione, numero);
 
 ALTER TABLE public.sass_eventi ENABLE ROW LEVEL SECURITY;
 
@@ -256,6 +271,9 @@ begin
     where p.turno_id is null
     group by p.evento_id
   ),
+  edizione_corrente as (
+    select max(edizione) as val from sass_eventi
+  ),
   eventi_json as (
     select
       jsonb_build_object(
@@ -266,14 +284,17 @@ begin
         'ora_fine', to_char(e.ora_fine, 'HH24:MI'),
         'a_turni', e.a_turni,
         'capienza', e.capienza_max,
+        'checkin_attivo', e.checkin_attivo,
         'prenotati_persone', case when e.a_turni then coalesce(tpe.prenotati_persone, 0) else coalesce(es.prenotati_persone, 0) end,
         'checkin_persone', case when e.a_turni then coalesce(tpe.checkin_persone, 0) else coalesce(es.checkin_persone, 0) end,
         'turni', case when e.a_turni then coalesce(tpe.turni, '[]'::jsonb) else '[]'::jsonb end
       ) as ev,
       e.numero as e_numero
     from sass_eventi e
+    cross join edizione_corrente ec
     left join turni_per_evento tpe on tpe.evento_id = e.id
     left join evento_stats es on es.evento_id = e.id
+    where e.edizione = ec.val
   )
   select jsonb_build_array(
     jsonb_build_object(
@@ -313,7 +334,7 @@ VALUES
   (5, 'Percezione', '#e85aa0', '2026-07-24', '17:30', '21:45',
    'Occhio all''illusione', 'Lasciamoci ingannare', '8+', 'Piazza Bartolo', NULL, TRUE, 45, 20,
    'Scopriamo come funzionano occhi e cervello! Tra giochi, esperimenti e illusioni ottiche, seguiamo il viaggio della luce che entra nei nostri occhi e diventa le immagini che vediamo ogni giorno.')
-ON CONFLICT (numero) DO NOTHING;
+ON CONFLICT (edizione, numero) DO NOTHING;
 
 -- Turni per i laboratori a turni (astrolabio, VR, illusione)
 INSERT INTO public.sass_turni (evento_id, data, ora_inizio, ora_fine, capienza, ordine)
@@ -338,10 +359,14 @@ JOIN (VALUES
   (5, '19:30', '20:15', 2),
   (5, '21:00', '21:45', 3)
 ) AS s(numero, ora_inizio, ora_fine, ordine) ON s.numero = e.numero
+WHERE e.edizione = 2026
 ON CONFLICT (evento_id, data, ora_inizio) DO NOTHING;
 
 -- Labirinti matematici: attività a fruizione libera (nessuna prenotazione)
-UPDATE public.sass_eventi SET prenotazioni_attive = FALSE WHERE numero = 2;
+UPDATE public.sass_eventi SET prenotazioni_attive = FALSE WHERE edizione = 2026 AND numero = 2;
+
+-- L'edizione 2026 si è conclusa: chiudi lo scan/check-in per tutti i suoi laboratori.
+UPDATE public.sass_eventi SET checkin_attivo = FALSE WHERE edizione = 2026;
 
 -- ============================================================
 -- Per promuovere il primo admin (eseguire manualmente):

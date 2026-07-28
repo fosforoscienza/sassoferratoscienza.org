@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { formatRangeOrario } from '@/lib/types'
+import { formatRangeOrario, edizioniDisponibili, risolviEdizione } from '@/lib/types'
+import EdizioneSwitch from '@/components/EdizioneSwitch'
 
 export const revalidate = 0
 
@@ -9,13 +10,25 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 export default async function AdminPrenotazioniPage({
   searchParams,
 }: {
-  searchParams: { checkin?: string; q?: string; turno?: string; evento?: string }
+  searchParams: { checkin?: string; q?: string; turno?: string; evento?: string; edizione?: string }
 }) {
   const supabase = createClient()
 
   const rawQ = searchParams.q?.toLowerCase().replace(/[,:()*.\\%]/g, '').slice(0, 80).trim() ?? ''
   const turnoId = searchParams.turno && UUID_RE.test(searchParams.turno) ? searchParams.turno : null
   const eventoId = searchParams.evento && UUID_RE.test(searchParams.evento) ? searchParams.evento : null
+
+  // Senza un turno/evento specifico (già di per sé di un'unica edizione), filtra
+  // per l'edizione selezionata (di default la più recente).
+  let edizioni: number[] = []
+  let edizioneAttiva: number | null = null
+  let idsEdizione: string[] = []
+  if (!turnoId && !eventoId) {
+    const { data: eventiTutti } = await supabase.from('sass_eventi').select('id, edizione')
+    edizioni = edizioniDisponibili(eventiTutti ?? [])
+    edizioneAttiva = risolviEdizione(edizioni, searchParams.edizione)
+    idsEdizione = (eventiTutti ?? []).filter(e => e.edizione === edizioneAttiva).map(e => e.id)
+  }
 
   let matchingEventiIds: string[] = []
   if (rawQ) {
@@ -60,6 +73,7 @@ export default async function AdminPrenotazioniPage({
 
   if (turnoId) query = query.eq('turno_id', turnoId)
   else if (eventoId) query = query.eq('evento_id', eventoId)
+  else if (idsEdizione.length) query = query.in('evento_id', idsEdizione)
   if (searchParams.checkin === '1') {
     query = query.not('check_in_at', 'is', null)
   }
@@ -82,6 +96,7 @@ export default async function AdminPrenotazioniPage({
         <div>
           <h1 className="font-display text-2xl font-black text-brown md:text-3xl">Prenotazioni</h1>
           <p className="mt-1 text-xs text-slate-600 md:text-sm">
+            {edizioneAttiva ? `Edizione ${edizioneAttiva} · ` : ''}
             {prenotazioni.length} prenotazion{prenotazioni.length === 1 ? 'e' : 'i'} · {totPersone} person{totPersone === 1 ? 'a' : 'e'}
             {searchParams.checkin === '1' ? ' · solo con check-in' : ''}
           </p>
@@ -106,6 +121,9 @@ export default async function AdminPrenotazioniPage({
           )}
         </div>
         <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
+          {!turnoId && !eventoId && edizioneAttiva && (
+            <EdizioneSwitch edizioni={edizioni} attiva={edizioneAttiva} basePath="/admin/prenotazioni" />
+          )}
           <form className="flex flex-1 gap-2 sm:flex-none" method="get">
             <input
               type="search"
@@ -117,6 +135,7 @@ export default async function AdminPrenotazioniPage({
             {searchParams.checkin === '1' && <input type="hidden" name="checkin" value="1" />}
             {turnoId && <input type="hidden" name="turno" value={turnoId} />}
             {!turnoId && eventoId && <input type="hidden" name="evento" value={eventoId} />}
+            {!turnoId && !eventoId && edizioneAttiva && <input type="hidden" name="edizione" value={edizioneAttiva} />}
             <button type="submit" className="btn-primary shrink-0 px-4 py-2 text-sm">Cerca</button>
           </form>
           <a
@@ -125,6 +144,7 @@ export default async function AdminPrenotazioniPage({
               ...(searchParams.checkin ? { checkin: searchParams.checkin } : {}),
               ...(turnoId ? { turno: turnoId } : {}),
               ...(!turnoId && eventoId ? { evento: eventoId } : {}),
+              ...(!turnoId && !eventoId && edizioneAttiva ? { edizione: String(edizioneAttiva) } : {}),
             }).toString()}`}
             className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-sass-700 shadow-sm hover:border-sass-400"
             title="Scarica CSV con tutti i campi"

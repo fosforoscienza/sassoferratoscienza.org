@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import BookingHeader from '@/components/BookingHeader'
-import { formatRangeOrario } from '@/lib/types'
+import { formatRangeOrario, edizioniDisponibili, risolviEdizione } from '@/lib/types'
 
 export const revalidate = 0
 
@@ -27,16 +27,21 @@ type EventoRow = {
   capienza_max: number | null
   prenotazioni_attive: boolean
   posti_esauriti: boolean
+  edizione: number
 }
 
 export default async function PrenotaIndexPage() {
   const supabase = createClient()
   const { data } = await supabase
     .from('sass_eventi')
-    .select('id, numero, categoria, colore, titolo, sottotitolo, eta, ora_inizio, ora_fine, a_turni, capienza_max, prenotazioni_attive, posti_esauriti')
+    .select('id, numero, categoria, colore, titolo, sottotitolo, eta, ora_inizio, ora_fine, a_turni, capienza_max, prenotazioni_attive, posti_esauriti, edizione')
     .order('numero', { ascending: true })
 
-  const eventi = (data ?? []) as EventoRow[]
+  const eventiTutti = (data ?? []) as EventoRow[]
+  // Solo l'edizione più recente: le edizioni passate restano nel database
+  // per lo storico ma non devono comparire nel flusso di prenotazione pubblico.
+  const edizioneCorrente = risolviEdizione(edizioniDisponibili(eventiTutti))
+  const eventi = eventiTutti.filter(e => e.edizione === edizioneCorrente)
 
   // Disponibilità aggregata (vista, via service role per evitare blocchi RLS sui join).
   // Se la service role key non è configurata, i conteggi sono omessi senza errori.

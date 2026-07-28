@@ -23,6 +23,10 @@ export type Evento = {
   a_turni: boolean
   durata_turno_min: number | null
   capienza_turno: number | null
+  /** Anno del festival (2026, 2027, …): raggruppa i laboratori edizione per edizione. */
+  edizione: number
+  /** Se falso, /api/checkin rifiuta lo scan dei QR per questo laboratorio (evento concluso). */
+  checkin_attivo: boolean
 }
 
 export type Turno = {
@@ -92,6 +96,22 @@ export function formatDataIT(data: string): string {
 export function labelGiorno(data: string): string {
   const d = new Date(data + 'T00:00:00')
   return d.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' })
+}
+
+// ============================================================
+// HELPER EDIZIONI
+// ============================================================
+
+/** Edizioni presenti tra gli eventi passati, più recente prima. */
+export function edizioniDisponibili(eventi: { edizione: number }[]): number[] {
+  return Array.from(new Set(eventi.map(e => e.edizione))).sort((a, b) => b - a)
+}
+
+/** Edizione da usare: quella richiesta se valida, altrimenti la più recente. */
+export function risolviEdizione(edizioni: number[], richiesta?: string): number | null {
+  if (edizioni.length === 0) return null
+  const n = richiesta ? Number(richiesta) : NaN
+  return edizioni.includes(n) ? n : edizioni[0]
 }
 
 // ============================================================

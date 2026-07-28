@@ -1,4 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
+import { edizioniDisponibili, risolviEdizione } from '@/lib/types'
+import EdizioneSwitch from '@/components/EdizioneSwitch'
 
 export const revalidate = 0
 
@@ -28,16 +30,26 @@ function StatCard({ label, value }: { label: string; value: number | string }) {
   )
 }
 
-export default async function AdminReportPage() {
+export default async function AdminReportPage({
+  searchParams,
+}: {
+  searchParams: { edizione?: string }
+}) {
   const supabase = createClient()
 
-  const [{ data: eventi }, { data: prenotazioni }] = await Promise.all([
+  const [{ data: eventiTutti }, { data: prenotazioniTutte }] = await Promise.all([
     supabase
       .from('sass_eventi')
-      .select('id, numero, categoria, colore, titolo')
+      .select('id, numero, categoria, colore, titolo, edizione')
       .order('numero'),
     supabase.from('sass_prenotazioni').select('evento_id, n_persone, check_in_at'),
   ])
+
+  const edizioni = edizioniDisponibili(eventiTutti ?? [])
+  const edizioneAttiva = risolviEdizione(edizioni, searchParams.edizione)
+  const eventi = (eventiTutti ?? []).filter(e => e.edizione === edizioneAttiva)
+  const eventoIds = new Set(eventi.map(e => e.id))
+  const prenotazioni = (prenotazioniTutte ?? []).filter(p => eventoIds.has(p.evento_id))
 
   const statsByEvento = new Map<string, StatoLab>()
   for (const p of prenotazioni ?? []) {
@@ -72,19 +84,23 @@ export default async function AdminReportPage() {
         <div>
           <h1 className="font-display text-2xl font-black text-brown md:text-3xl">Report evento</h1>
           <p className="mt-1 text-xs text-slate-600 md:text-sm">
+            {edizioneAttiva ? `Edizione ${edizioneAttiva} · ` : ''}
             Prenotazioni effettuate e check-in scansionati durante la giornata, per laboratorio.
           </p>
         </div>
-        <a
-          href="/api/admin/report/export"
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-sass-700 shadow-sm hover:border-sass-400"
-          title="Scarica CSV con i totali per laboratorio"
-        >
-          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
-          </svg>
-          <span className="hidden sm:inline">Export</span> CSV
-        </a>
+        <div className="flex shrink-0 items-center gap-3">
+          {edizioneAttiva && <EdizioneSwitch edizioni={edizioni} attiva={edizioneAttiva} basePath="/admin/report" />}
+          <a
+            href={`/api/admin/report/export${edizioneAttiva ? `?edizione=${edizioneAttiva}` : ''}`}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-sass-700 shadow-sm hover:border-sass-400"
+            title="Scarica CSV con i totali per laboratorio"
+          >
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+            </svg>
+            <span className="hidden sm:inline">Export</span> CSV
+          </a>
+        </div>
       </div>
 
       <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">

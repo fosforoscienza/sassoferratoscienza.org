@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { edizioniDisponibili, risolviEdizione } from '@/lib/types'
 
 async function requireAdmin() {
   const supabase = createClient()
@@ -30,19 +31,27 @@ function statoVuoto(): StatoLab {
   return { prenotazioni: 0, persone: 0, scansioni: 0, personeScansionate: 0 }
 }
 
-export async function GET() {
+export async function GET(req: Request) {
   const auth = await requireAdmin()
   if (!auth.ok) {
     return NextResponse.json({ error: 'Non autorizzato' }, { status: auth.status })
   }
 
-  const [{ data: eventi }, { data: prenotazioni }] = await Promise.all([
+  const url = new URL(req.url)
+
+  const [{ data: eventiTutti }, { data: prenotazioniTutte }] = await Promise.all([
     auth.supabase
       .from('sass_eventi')
-      .select('id, numero, categoria, titolo')
+      .select('id, numero, categoria, titolo, edizione')
       .order('numero'),
     auth.supabase.from('sass_prenotazioni').select('evento_id, n_persone, check_in_at'),
   ])
+
+  const edizioni = edizioniDisponibili(eventiTutti ?? [])
+  const edizioneSelezionata = risolviEdizione(edizioni, url.searchParams.get('edizione') ?? undefined)
+  const eventi = (eventiTutti ?? []).filter(e => e.edizione === edizioneSelezionata)
+  const eventoIds = new Set(eventi.map(e => e.id))
+  const prenotazioni = (prenotazioniTutte ?? []).filter(p => eventoIds.has(p.evento_id))
 
   const statsByEvento = new Map<string, StatoLab>()
   for (const p of prenotazioni ?? []) {
@@ -84,7 +93,7 @@ export async function GET() {
 
   const csv = [header.join(','), ...righe, rigaTotale].join('\n')
   const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')
-  const filename = `sassoferrato-report-${stamp}.csv`
+  const filename = `sassoferrato-report-${edizioneSelezionata ?? 'na'}-${stamp}.csv`
 
   return new Response('﻿' + csv, {
     status: 200,

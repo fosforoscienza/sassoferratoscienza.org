@@ -7,6 +7,7 @@ export default async function ScanPage() {
   const supabase = createClient()
   const { data } = await supabase.rpc('sass_scan_targets')
   const palchi = (data as PalcoScan[] | null) ?? []
+  const tuttiChiusi = palchi.length > 0 && palchi.every(p => p.eventi.every(e => !e.checkin_attivo))
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-8">
@@ -15,6 +16,11 @@ export default async function ScanPage() {
         Scegli un laboratorio (o un turno) e inquadra i QR: vengono accettati solo quelli del target
         selezionato, con conteggio dei check-in in tempo reale.
       </p>
+      {tuttiChiusi && (
+        <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          L&apos;evento è concluso: tutti i laboratori sono chiusi e non accettano più check-in.
+        </p>
+      )}
       <div className="mt-6">
         <ScanClient palchi={palchi} />
       </div>

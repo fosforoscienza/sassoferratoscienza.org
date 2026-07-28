@@ -80,7 +80,7 @@ export async function POST(req: Request) {
 
   const { data: prenotazione, error: errRead } = await supabase
     .from('sass_prenotazioni')
-    .select('id, nome, cognome, check_in_at, turno_id, evento_id, evento:sass_eventi(titolo)')
+    .select('id, nome, cognome, check_in_at, turno_id, evento_id, evento:sass_eventi(titolo, checkin_attivo)')
     .eq('token', parsed.data.token)
     .single()
 
@@ -90,6 +90,14 @@ export async function POST(req: Request) {
 
   const ev = (prenotazione as any).evento
   const titoloEvento = Array.isArray(ev) ? ev[0]?.titolo : ev?.titolo
+  const checkinAttivo = Array.isArray(ev) ? ev[0]?.checkin_attivo : ev?.checkin_attivo
+
+  if (checkinAttivo === false) {
+    return NextResponse.json(
+      { error: `Il laboratorio${titoloEvento ? ` "${titoloEvento}"` : ''} è chiuso: non è più possibile registrare check-in.` },
+      { status: 403 }
+    )
+  }
 
   const turnoId = parsed.data.turnoId ?? null
   const eventoId = parsed.data.eventoId ?? null
