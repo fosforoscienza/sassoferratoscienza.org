@@ -265,7 +265,7 @@ export const LANDING_HTML = `
                 <div class="info-row__value info-row__value--accent">Libero e gratuito</div>
               </div>
             </div>
-            <a class="btn btn--primary" href="https://www.google.com/maps/search/?api=1&amp;query=Piazza+Gaspare+Bartolo+Sassoferrato" target="_blank" rel="noopener">Apri in Google Maps →</a>
+            <a class="btn btn--primary" href="https://maps.app.goo.gl/BnRxk85f12syefZb9" target="_blank" rel="noopener">Apri in Google Maps →</a>
           </div>
 
           <div class="map" data-reveal data-reveal-delay="120">
